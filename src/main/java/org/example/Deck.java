@@ -58,7 +58,18 @@ class Deck {
     }
 
     List<Card> draw(int amount) {
-        return new ArrayList<>();
+        if (deck.size() < amount) {
+            return null;
+        }
+        List<Card> cards = new ArrayList<>();
+        for (int i = 0; i < amount; ++i) {
+            cards.add(draw());
+        }
+        return cards;
+    }
+
+    void add(List<Card> cards) {
+        deck.addAll(cards);
     }
 
     int size() {

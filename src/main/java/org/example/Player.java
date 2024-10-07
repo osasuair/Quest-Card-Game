@@ -3,10 +3,17 @@ package org.example;
 import java.util.List;
 
 class Player {
-    Deck getDeck() {
-        return new Deck();
+    Deck hand;
+
+    public Player() {
+        hand = new Deck();
     }
 
-    public void pickCards(List<Card> draw) {
+    Deck getDeck() {
+        return hand;
+    }
+
+    public void pickCards(List<Card> cards) {
+        hand.add(cards);
     }
 }

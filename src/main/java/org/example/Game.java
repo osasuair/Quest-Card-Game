@@ -1,7 +1,7 @@
 package org.example;
 
 public class Game {
-    Player[] players;
+    final Player[] players;
     Deck adventureDeck, questDeck;
 
     public Game(int playersAmount) {
@@ -18,8 +18,13 @@ public class Game {
         questDeck.initQuestDeck();
         adventureDeck.shuffle();
         questDeck.shuffle();
+
+        initPlayers();
     }
 
     public void initPlayers() {
+        for (Player player : players) {
+            player.pickCards(adventureDeck.draw(12));
+        }
     }
 }
