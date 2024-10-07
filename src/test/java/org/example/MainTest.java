@@ -3,6 +3,8 @@ package org.example;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.example.Main.PLAYERS_AMOUNT;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -141,6 +143,51 @@ class MainTest {
         }
 
         assertEquals(100-PLAYERS_AMOUNT*12, game.adventureDeck.size());
+    }
+
+    @Test
+    @DisplayName("Game determines winners with 7 or more shields - No shields given")
+    public void RESP_03_test_01() {
+        Game game = new Game(PLAYERS_AMOUNT);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+
+        List<Player> winners = game.checkWinners();
+
+        assertTrue(winners.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Game determines winners with 7 or more shields - 1 player has 7 shields")
+    public void RESP_03_test_02() {
+        Game game = new Game(PLAYERS_AMOUNT);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        game.players[0].shields = 7;
+
+        List<Player> winners = game.checkWinners();
+
+        assertEquals(1, winners.size());
+        assertEquals(game.players[0], winners.getFirst());
+    }
+
+    @Test
+    @DisplayName("Game determines winners with 7 or more shields - 3 players have 7 shields")
+    public void RESP_03_test_03() {
+        Game game = new Game(PLAYERS_AMOUNT);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        game.players[0].shields = 7;
+        game.players[1].shields = 15;
+        game.players[2].shields = 8;
+        game.players[3].shields = 6;
+
+        List<Player> winners = game.checkWinners();
+
+        assertEquals(3, winners.size());
+        assertEquals(game.players[0], winners.getFirst());
+        assertEquals(game.players[1], winners.get(1));
+        assertEquals(game.players[2], winners.getLast());
     }
 
 }

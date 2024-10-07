@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.List;
+
 public class Game {
     final Player[] players;
     Deck adventureDeck, questDeck;
@@ -27,4 +29,9 @@ public class Game {
             player.pickCards(adventureDeck.draw(12));
         }
     }
+
+    List<Player> checkWinners() {
+        return null;
+    }
+
 }

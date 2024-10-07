@@ -4,9 +4,11 @@ import java.util.List;
 
 class Player {
     Deck hand;
+    int shields;
 
     public Player() {
         hand = new Deck();
+        shields = 0;
     }
 
     Deck getDeck() {
