@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
@@ -22,6 +23,14 @@ public class Game {
         questDeck.shuffle();
 
         initPlayers();
+
+        List<Player> winners = checkWinners();
+        while (true) {
+            if (!(winners = checkWinners()).isEmpty()) {
+                break;
+            }
+            break;
+        }
     }
 
     public void initPlayers() {
@@ -31,7 +40,13 @@ public class Game {
     }
 
     List<Player> checkWinners() {
-        return null;
+        ArrayList<Player> winners = new ArrayList<>();
+        for (Player player : players) {
+            if (player.shields >= 7) {
+                winners.add(player);
+            }
+        }
+        return winners;
     }
 
 }
