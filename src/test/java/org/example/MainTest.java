@@ -112,7 +112,7 @@ class MainTest {
     @Test
     @DisplayName("Check Player deck contains 12 adventure cards")
     public void RESP_02_test_01() {
-        Player player = new Player();
+        Player player = new Player(1);
         Deck adventureDeck = new Deck();
         adventureDeck.initAdventureDeck();
 

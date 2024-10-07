@@ -15,7 +15,7 @@ public class Game {
         questDeck = new Deck();
         players = new Player[playersAmount];
         for (int i = 0; i < playersAmount; ++i) {
-            players[i] = new Player();
+            players[i] = new Player(i+1);
         }
     }
 
@@ -27,13 +27,14 @@ public class Game {
 
         initPlayers();
 
-        List<Player> winners = checkWinners();
+        List<Player> winners;
         while (true) {
             if (!(winners = checkWinners()).isEmpty()) {
                 break;
             }
             break;
         }
+        displayWinners(winners);
     }
 
     public void initPlayers() {
@@ -50,5 +51,13 @@ public class Game {
             }
         }
         return winners;
+    }
+
+    void displayWinners(List<Player> winners) {
+        String[] winnersNames = new String[winners.size()];
+        for(int i = 0; i < winners.size(); ++i) {
+            winnersNames[i] = winners.get(i).toString();
+        }
+        output.println("Winners: " + String.join(", ", winnersNames));
     }
 }
