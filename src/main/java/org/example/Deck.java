@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 class Deck {
     static final int[] FOES_AMOUNT = {8, 7, 8, 7, 7, 4, 4, 2, 2, 1};
@@ -56,7 +57,22 @@ class Deck {
         return deck.removeFirst();
     }
 
+    List<Card> draw(int amount) {
+        return new ArrayList<>();
+    }
+
     int size() {
         return deck.size();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Deck other)) {
+            return false;
+        }
+        return deck.equals(other.deck);
     }
 }

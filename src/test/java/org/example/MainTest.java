@@ -3,8 +3,8 @@ package org.example;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.example.Main.PLAYERS_AMOUNT;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MainTest {
 
@@ -104,4 +104,43 @@ class MainTest {
 
         assertFalse(same);
     }
+
+    @Test
+    @DisplayName("Check Player deck contains 12 adventure cards")
+    public void RESP_02_test_01() {
+        Player player = new Player();
+        Deck adventureDeck = new Deck();
+        adventureDeck.initAdventureDeck();
+
+        player.pickCards(adventureDeck.draw(12));
+
+        assertEquals(12, player.getDeck().size());
+        for (int i = 0; i < 12; ++i) {
+            assertEquals("Adv", player.getDeck().draw().cardType);
+        }
+        assertEquals(88, adventureDeck.size());
+    }
+
+    @Test
+    @DisplayName("Check all Players have different decks of 12 cards")
+    public void RESP_02_test_02() {
+        Game game = new Game(PLAYERS_AMOUNT);
+        game.adventureDeck.initAdventureDeck();
+        game.questDeck.initQuestDeck();
+        game.adventureDeck.shuffle();
+        game.questDeck.shuffle();
+
+        game.initPlayers();
+
+        for (int i = 0; i < PLAYERS_AMOUNT; ++i) {
+            Deck playerDeck = game.players[i].getDeck();
+            for (int j = i + 1; j < PLAYERS_AMOUNT; ++j) {
+                assertNotEquals(playerDeck, game.players[j].getDeck());
+            }
+            assertEquals(12, playerDeck.size());
+        }
+
+        assertEquals(100-PLAYERS_AMOUNT*12, game.adventureDeck.size());
+    }
+
 }
