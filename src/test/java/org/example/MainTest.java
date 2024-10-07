@@ -3,6 +3,8 @@ package org.example;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 import static org.example.Main.PLAYERS_AMOUNT;
@@ -126,7 +128,7 @@ class MainTest {
     @Test
     @DisplayName("Check all Players have different decks of 12 cards")
     public void RESP_02_test_02() {
-        Game game = new Game(PLAYERS_AMOUNT);
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
         game.adventureDeck.initAdventureDeck();
         game.questDeck.initQuestDeck();
         game.adventureDeck.shuffle();
@@ -148,7 +150,7 @@ class MainTest {
     @Test
     @DisplayName("Game determines winners with 7 or more shields - No shields given")
     public void RESP_03_test_01() {
-        Game game = new Game(PLAYERS_AMOUNT);
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
         game.adventureDeck.initAdventureDeck();
         game.initPlayers();
 
@@ -160,7 +162,7 @@ class MainTest {
     @Test
     @DisplayName("Game determines winners with 7 or more shields - 1 player has 7 shields")
     public void RESP_03_test_02() {
-        Game game = new Game(PLAYERS_AMOUNT);
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
         game.adventureDeck.initAdventureDeck();
         game.initPlayers();
         game.players[0].shields = 7;
@@ -174,7 +176,7 @@ class MainTest {
     @Test
     @DisplayName("Game determines winners with 7 or more shields - 3 players have 7 shields")
     public void RESP_03_test_03() {
-        Game game = new Game(PLAYERS_AMOUNT);
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
         game.adventureDeck.initAdventureDeck();
         game.initPlayers();
         game.players[0].shields = 7;
@@ -188,6 +190,19 @@ class MainTest {
         assertEquals(game.players[0], winners.getFirst());
         assertEquals(game.players[1], winners.get(1));
         assertEquals(game.players[2], winners.getLast());
+    }
+
+    @Test
+    @DisplayName("Game displays the ids of winners")
+    public void RESP_04_test_01() {
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        game.players[0].shields = 7;
+        game.players[2].shields = 8;
+
+        game.start();
+
+        assertTrue(output.toString().strip().endsWith("Winners: P1, P3"));
     }
 
 }

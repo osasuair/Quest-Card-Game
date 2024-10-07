@@ -1,19 +1,22 @@
 package org.example;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
     final Player[] players;
     Deck adventureDeck, questDeck;
+    PrintWriter output;
 
-    public Game(int playersAmount) {
+    public Game(int playersAmount, PrintWriter output) {
+        this.output = output;
+        adventureDeck = new Deck();
+        questDeck = new Deck();
         players = new Player[playersAmount];
         for (int i = 0; i < playersAmount; ++i) {
             players[i] = new Player();
         }
-        adventureDeck = new Deck();
-        questDeck = new Deck();
     }
 
     public void start() {
@@ -48,5 +51,4 @@ public class Game {
         }
         return winners;
     }
-
 }
