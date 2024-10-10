@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.Collections;
 import java.util.List;
 
 class Player {
@@ -14,11 +15,16 @@ class Player {
     }
 
     Deck getDeck() {
+        sortHand();
         return hand;
     }
 
     public void pickCards(List<Card> cards) {
         hand.add(cards);
+    }
+
+    public void sortHand() {
+        Collections.sort(hand.asList());
     }
 
     @Override
