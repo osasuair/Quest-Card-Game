@@ -28,18 +28,20 @@ public class Game {
         questDeck.shuffle();
 
         initPlayers();
-
         List<Player> winners;
-        while (true) {
-            if (!(winners = checkWinners()).isEmpty()) {
-                break;
-            }
-            break;
-        }
+        do {
+            Player player = players[currentPlayer];
+            playTurn(player);
+            currentPlayer = (currentPlayer + 1) % players.length;
+        } while ((winners = checkWinners()).isEmpty());
         displayWinners(winners);
     }
 
-    public void initPlayers() {
+    void playTurn(Player player) {
+        print(player + "'s turn - Hand: " + player.getDeck());
+    }
+
+    void initPlayers() {
         for (Player player : players) {
             player.pickCards(adventureDeck.draw(12));
         }

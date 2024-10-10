@@ -90,4 +90,9 @@ class Deck {
         }
         return deck.equals(other.deck);
     }
+
+    @Override
+    public String toString() {
+        return deck.toString();
+    }
 }

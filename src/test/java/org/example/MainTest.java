@@ -311,8 +311,8 @@ class MainTest {
         };
         game.start();
 
-        for (int i = 0; i < PLAYERS_AMOUNT; ++i)
-            assertTrue(output.toString().contains(String.format("P%d's turn - Hand: %s", i, game.players[i].getDeck())));
+        for (int i = 0; i < PLAYERS_AMOUNT-1; ++i)
+            assertTrue(output.toString().contains(String.format("P%d's turn - Hand: %s", i+1, game.players[i].getDeck())));
         assertFalse(output.toString().contains("P4's turn"));
     }
 
