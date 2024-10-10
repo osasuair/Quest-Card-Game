@@ -617,4 +617,47 @@ class MainTest {
         assertEquals(firstCard, position);
     }
 
+    @Test
+    @DisplayName("Game deletes n cards from a player's hand")
+    public void RESP_14_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\n1\n2\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.adventureDeck.shuffle();
+        game.initPlayers();
+        int excessCards = 3;
+        game.players[0].pickCards(game.adventureDeck.draw(excessCards));
+
+        // Act
+        game.trimHand(game.players[0]);
+
+        // Assert
+        assertEquals(12, game.players[0].getDeck().size());
+    }
+
+    @Test
+    @DisplayName("Game displays hand after each trimming")
+    public void RESP_14_test_02() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Scanner input = new Scanner("0\n0\n0\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.adventureDeck.shuffle();
+        game.initPlayers();
+        int excessCards = 3;
+        game.players[0].pickCards(game.adventureDeck.draw(excessCards));
+        List<Card> orgHand = new ArrayList<>(game.players[0].getDeck().asList());
+
+        // Act
+        game.trimHand(game.players[0]);
+
+        // Assert
+        System.out.println(output);
+        for (int i = 1; i <= 3; ++i) {
+            int size = orgHand.size();
+            assertTrue(output.toString().contains("P1's trimmed hand: " + orgHand.subList(i, size)));
+        }
+    }
 }
