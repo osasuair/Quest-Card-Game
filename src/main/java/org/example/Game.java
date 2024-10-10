@@ -10,9 +10,11 @@ public class Game {
     int currentPlayer;
     Deck adventureDeck, questDeck;
     PrintWriter output;
+    Scanner input;
 
     public Game(int playersAmount, Scanner input, PrintWriter output) {
         this.output = output;
+        this.input = input;
         currentPlayer = 0;
         adventureDeck = new Deck();
         questDeck = new Deck();
@@ -48,6 +50,17 @@ public class Game {
         if (card.type != 'Q') {
             handleEventCard(player, card);
         }
+
+        print(player + "'s turn is over, press Enter to continue");
+        input.nextLine();
+        clearHotseat();
+    }
+
+    void clearHotseat() {
+        for (int i = 0; i < 10; ++i) {
+            output.println();
+        }
+        output.flush();
     }
 
     void handleEventCard(Player player, Card card) {
