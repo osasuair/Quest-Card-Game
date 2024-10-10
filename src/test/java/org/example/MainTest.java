@@ -562,4 +562,59 @@ class MainTest {
         // Assert
         assertEquals(0, trim);
     }
+
+    @Test
+    @DisplayName("Game prompts player for a card position - valid position")
+    public void RESP_13_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        Card firstCard = game.players[0].getDeck().asList().getFirst();
+
+        // Act
+        Card position = game.selectCard(game.players[0]);
+
+        // Assert
+        assertFalse(input.hasNextLine());
+        assertEquals(firstCard, position);
+    }
+
+    @Test
+    @DisplayName("Game prompts player for a card position - valid position")
+    public void RESP_13_test_02() {
+        // Arrange
+        Scanner input = new Scanner("4\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        Card firstCard = game.players[0].getDeck().asList().get(4);
+
+        // Act
+        Card position = game.selectCard(game.players[0]);
+
+        // Assert
+        assertFalse(input.hasNextLine());
+        assertEquals(firstCard, position);
+    }
+
+    @Test
+    @DisplayName("Game prompts player for a card position - invalid position")
+    public void RESP_13_test_03() {
+        // Arrange
+        Scanner input = new Scanner("13\n0\n");  // 13 is invalid, 0 is valid
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        Card firstCard = game.players[0].getDeck().asList().getFirst();
+
+        // Act
+        Card position = game.selectCard(game.players[0]);
+
+        // Assert
+        assertFalse(input.hasNextLine()); // Verify that the player was prompted twice
+        assertEquals(firstCard, position);
+    }
+
 }

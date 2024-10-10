@@ -95,6 +95,10 @@ public class Game {
         }
     }
 
+    Card selectCard(Player player) {
+        return new Card("Dummy");
+    }
+
     List<Player> checkWinners() {
         ArrayList<Player> winners = new ArrayList<>();
         for (Player player : players) {
