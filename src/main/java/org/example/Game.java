@@ -6,11 +6,13 @@ import java.util.List;
 
 public class Game {
     final Player[] players;
+    int currentPlayer;
     Deck adventureDeck, questDeck;
     PrintWriter output;
 
     public Game(int playersAmount, PrintWriter output) {
         this.output = output;
+        currentPlayer = 0;
         adventureDeck = new Deck();
         questDeck = new Deck();
         players = new Player[playersAmount];
@@ -58,6 +60,11 @@ public class Game {
         for(int i = 0; i < winners.size(); ++i) {
             winnersNames[i] = winners.get(i).toString();
         }
-        output.println("Winners: " + String.join(", ", winnersNames));
+        print("Winners: " + String.join(", ", winnersNames));
+    }
+
+    void print(Object message) {
+        output.println(message);
+        output.flush();
     }
 }

@@ -298,5 +298,42 @@ class MainTest {
         }
     }
 
+    @Test
+    @DisplayName("Game correctly indicates whose turn it is and their hand")
+    public void RESP_06_test_01() {
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output)) {
+            public void playTurn(Player player) {
+                print(player + "'s turn - Hand: " + player.getDeck());
+                if (currentPlayer == 2)
+                    players[0].shields = 7;
+            }
+        };
+        game.start();
 
+        for (int i = 0; i < PLAYERS_AMOUNT; ++i)
+            assertTrue(output.toString().contains(String.format("P%d's turn - Hand: %s", i, game.players[i].getDeck())));
+        assertFalse(output.toString().contains("P4's turn"));
+    }
+
+    @Test
+    @DisplayName("Game correctly loops through players")
+    public void RESP_06_test_02() {
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output)) {
+            static int times = 0;
+            public void playTurn(Player player) {
+                print(player + "'s turn");
+                if (currentPlayer == 0 && times++ == 1)
+                    players[0].shields = 7;
+            }
+        };
+        game.start();
+
+        String outputStr = output.toString();
+        for (int i = 0; i < PLAYERS_AMOUNT; ++i)
+            assertTrue(outputStr.contains(String.format("P%d's turn", i+1)));
+        assertEquals(2, outputStr.split("P1's turn").length - 1);
+        assertEquals(1, outputStr.split("P2's turn").length - 1);
+    }
 }
