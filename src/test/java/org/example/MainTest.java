@@ -472,4 +472,26 @@ class MainTest {
                            .asList()
                            .containsAll(Stream.concat(advDeck.stream(), orgHand.stream()).toList()));
     }
+
+    @Test
+    @DisplayName("Game carries out Prosperity Event card effect")
+    public void RESP_10_test_01() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.adventureDeck.shuffle();
+
+        // Manipulate the quest deck to ensure the first card is a Prosperity card
+        game.questDeck.add(List.of(new Card("Prosperity")));
+
+        // Act
+        game.playTurn(game.players[0]);
+
+        // Assert
+        // Ensure all players have 2 more cards in their hand
+        for (int i = 0; i < PLAYERS_AMOUNT; ++i) {
+            assertEquals(2, game.players[i].getDeck().size());
+        }
+    }
 }
