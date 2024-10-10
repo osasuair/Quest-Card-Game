@@ -96,7 +96,17 @@ public class Game {
     }
 
     Card selectCard(Player player) {
-        return new Card("Dummy");
+        Card card = null;
+        while (card == null) {
+            print(player.getDeck());
+            print("Select a card: ");
+            String cardIndex = input.nextLine();
+            card = player.getCard(Integer.parseInt(cardIndex));
+            if (card == null) {
+                print("Invalid card index");
+            }
+        }
+        return card;
     }
 
     List<Player> checkWinners() {

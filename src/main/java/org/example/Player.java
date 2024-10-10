@@ -14,6 +14,13 @@ class Player {
         shields = 0;
     }
 
+    public Card getCard(int index) {
+        if (index < 0 || index >= hand.size()) {
+            return null;
+        }
+        return hand.asList().get(index);
+    }
+
     Deck getDeck() {
         sortHand();
         return hand;
