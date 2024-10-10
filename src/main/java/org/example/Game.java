@@ -56,13 +56,6 @@ public class Game {
         clearHotseat();
     }
 
-    void clearHotseat() {
-        for (int i = 0; i < 10; ++i) {
-            output.println();
-        }
-        output.flush();
-    }
-
     void handleEventCard(Player player, Card card) {
         switch (card.cardType) {
             case "Plague" -> handlePlague(player);
@@ -112,6 +105,10 @@ public class Game {
         return winners;
     }
 
+    int computeTrim(Player player) {
+        return player.hand.size() > 12 ? player.hand.size() - 12 : 0;
+    }
+
     void displayWinners(List<Player> winners) {
         String[] winnersNames = new String[winners.size()];
         for(int i = 0; i < winners.size(); ++i) {
@@ -120,12 +117,15 @@ public class Game {
         print("Winners: " + String.join(", ", winnersNames));
     }
 
-    void print(Object message) {
-        output.println(message);
+    void clearHotseat() {
+        for (int i = 0; i < 10; ++i) {
+            output.println();
+        }
         output.flush();
     }
 
-    int computeTrim(Player player) {
-        return -1;
+    void print(Object message) {
+        output.println(message);
+        output.flush();
     }
 }
