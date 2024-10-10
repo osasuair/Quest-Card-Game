@@ -39,6 +39,9 @@ public class Game {
 
     void playTurn(Player player) {
         print(player + "'s turn - Hand: " + player.getDeck());
+
+        Card card = questDeck.draw();
+        print("Player " + player + " drew " + card);
     }
 
     void initPlayers() {

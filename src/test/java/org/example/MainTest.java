@@ -405,7 +405,7 @@ class MainTest {
         game.playTurn(game.players[0]);
 
         // Assert
-        String expectedOutput = "Player 1 drew Plague";
+        String expectedOutput = "Player P1 drew Plague";
         assertTrue(output.toString().contains(expectedOutput));
     }
 }
