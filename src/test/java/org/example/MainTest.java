@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
+import java.util.*;
 
 import static org.example.Main.PLAYERS_AMOUNT;
 import static org.junit.jupiter.api.Assertions.*;
@@ -200,9 +200,103 @@ class MainTest {
         game.players[0].shields = 7;
         game.players[2].shields = 8;
 
-        game.start();
+        game.displayWinners(game.checkWinners());
 
         assertTrue(output.toString().strip().endsWith("Winners: P1, P3"));
     }
+
+    @Test
+    @DisplayName("Game returns a players hand with only foes in order")
+    public void RESP_05_test_01() {
+        Player player = new Player(1);
+        Deck adventureDeck = new Deck();
+        adventureDeck.initAdventureDeck();
+        adventureDeck.shuffle();
+        List<Card> foes = new ArrayList<>();
+        while (foes.size() < 12 && adventureDeck.size() != 0) {
+            Card card = adventureDeck.draw();
+            if (card.cardType.equals("Adv") && card.type == 'F') {
+                foes.add(card);
+                player.pickCards(List.of(card));
+            }
+        }
+        foes.sort(Comparator.comparingInt(card -> card.value));
+
+        List<Card> hand = player.getDeck().asList();
+
+        for (int i = 0; i < 12; ++i) {
+            assertEquals(foes.get(i), hand.get(i));
+        }
+    }
+
+    @Test
+    @DisplayName("Game returns a players hand with only weapons in order")
+    public void RESP_05_test_02() {
+        Player player = new Player(1);
+        Deck adventureDeck = new Deck();
+        adventureDeck.initAdventureDeck();
+        adventureDeck.shuffle();
+        List<Card> weapons = new ArrayList<>();
+        while (weapons.size() < 12 && adventureDeck.size() != 0) {
+            Card card = adventureDeck.draw();
+            if (card.cardType.equals("Adv") && card.type != 'F' && card.type != 'H') {
+                weapons.add(card);
+                player.pickCards(List.of(card));
+            }
+        }
+        weapons.sort(Comparator.comparingInt(card -> card.value));
+
+        List<Card> hand = player.getDeck().asList();
+
+        for (int i = 0; i < 12; ++i) {
+            assertEquals(weapons.get(i), hand.get(i));
+        }
+    }
+
+    @Test
+    @DisplayName("Game returns a players hand with mixed adventure cards in order")
+    public void RESP_05_test_03() {
+        Player player = new Player(1);
+        List<Card> cards = new ArrayList<>(Arrays.asList(
+                new Card("Adv", 'F', 5),
+                new Card("Adv", 'F', 10),
+                new Card("Adv", 'F', 15),
+                new Card("Adv", 'S', 10),
+                new Card("Adv", 'H', 10),
+                new Card("Adv", 'B', 15)));
+        List<Card> shuffled = new ArrayList<>(cards);
+        Collections.shuffle(shuffled);
+        player.pickCards(shuffled);
+
+        List<Card> hand = player.getDeck().asList();
+
+        for (int i = 0; i < 6; ++i) {
+            assertEquals(cards.get(i), hand.get(i));
+        }
+    }
+
+    @Test
+    @DisplayName("Game returns a players hand with swords adventure cards before horses")
+    public void RESP_05_test_04() {
+        Player player = new Player(1);
+        List<Card> cards = new ArrayList<>(Arrays.asList(
+                new Card("Adv", 'S', 10),
+                new Card("Adv", 'S', 10),
+                new Card("Adv", 'H', 10),
+                new Card("Adv", 'H', 10),
+                new Card("Adv", 'H', 10),
+                new Card("Adv", 'H', 10)));
+        List<Card> shuffled = new ArrayList<>(cards);
+        Collections.shuffle(shuffled);
+        player.pickCards(shuffled);
+
+        List<Card> hand = player.getDeck().asList();
+
+        for (int i = 0; i < 6; ++i) {
+            assertEquals(cards.get(i).type, hand.get(i).type);
+            assertEquals(cards.get(i).value, hand.get(i).value);
+        }
+    }
+
 
 }

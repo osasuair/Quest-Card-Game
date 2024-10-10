@@ -72,6 +72,10 @@ class Deck {
         deck.addAll(cards);
     }
 
+    List<Card> asList() {
+        return deck;
+    }
+
     int size() {
         return deck.size();
     }
