@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.example.Main.PLAYERS_AMOUNT;
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,7 +166,7 @@ class MainTest {
             assertEquals(12, playerDeck.size());
         }
 
-        assertEquals(100-PLAYERS_AMOUNT*12, game.adventureDeck.size());
+        assertEquals(100 - PLAYERS_AMOUNT * 12, game.adventureDeck.size());
     }
 
     @Test
@@ -351,8 +352,7 @@ class MainTest {
         Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output)) {
             public void playTurn(Player player) {
                 print(player + "'s turn - Hand: " + player.getDeck());
-                if (currentPlayer == 2)
-                    players[0].shields = 7;
+                if (currentPlayer == 2) players[0].shields = 7;
             }
         };
 
@@ -360,8 +360,9 @@ class MainTest {
         game.start();
 
         // Assert
-        for (int i = 0; i < PLAYERS_AMOUNT-1; ++i)
-            assertTrue(output.toString().contains(String.format("P%d's turn - Hand: %s", i+1, game.players[i].getDeck())));
+        for (int i = 0; i < PLAYERS_AMOUNT - 1; ++i)
+            assertTrue(output.toString()
+                               .contains(String.format("P%d's turn - Hand: %s", i + 1, game.players[i].getDeck())));
         assertFalse(output.toString().contains("P4's turn"));
     }
 
@@ -372,10 +373,10 @@ class MainTest {
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output)) {
             static int times = 0;
+
             public void playTurn(Player player) {
                 print(player + "'s turn");
-                if (currentPlayer == 0 && times++ == 1)
-                    players[0].shields = 7;
+                if (currentPlayer == 0 && times++ == 1) players[0].shields = 7;
             }
         };
 
@@ -385,7 +386,7 @@ class MainTest {
         // Assert
         String outputStr = output.toString();
         for (int i = 0; i < PLAYERS_AMOUNT; ++i)
-            assertTrue(outputStr.contains(String.format("P%d's turn", i+1)));
+            assertTrue(outputStr.contains(String.format("P%d's turn", i + 1)));
         assertEquals(2, outputStr.split("P1's turn").length - 1);
         assertEquals(1, outputStr.split("P2's turn").length - 1);
     }
@@ -417,7 +418,7 @@ class MainTest {
         Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
         game.players[0].shields = 6;
 
-        // Manipulate the quest deck to ensure the first card is an Event card
+        // Manipulate the quest deck to ensure the first card is a Plague card
         Card eventCard = new Card("Plague"); // Example Event card
         game.questDeck.add(List.of(eventCard));
 
@@ -436,7 +437,7 @@ class MainTest {
         Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
         game.players[0].shields = 1;
 
-        // Manipulate the quest deck to ensure the first card is an Event card
+        // Manipulate the quest deck to ensure the first card is a Plague card
         Card eventCard = new Card("Plague"); // Example Event card
         game.questDeck.add(List.of(eventCard));
 
@@ -447,4 +448,28 @@ class MainTest {
         assertEquals(0, game.players[0].shields);
     }
 
+    @Test
+    @DisplayName("Game carries out Queen's Favor Event card effect")
+    public void RESP_09_test_01() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        List<Card> advDeck = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'F', 15));
+        List<Card> orgHand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'F', 15));
+        game.adventureDeck.add(advDeck);
+        game.players[0].pickCards(orgHand);
+
+        // Manipulate the quest deck to ensure the first card is a Queen's Favor card
+        Card eventCard = new Card("Queen’s favor"); // Example Event card
+        game.questDeck.add(List.of(eventCard));
+
+        // Act
+        game.playTurn(game.players[0]);
+
+        // Assert
+        // Verify that the player's hand contains the original cards and the two new picked cards from the adventure deck
+        assertTrue(game.players[0].getDeck()
+                           .asList()
+                           .containsAll(Stream.concat(advDeck.stream(), orgHand.stream()).toList()));
+    }
 }
