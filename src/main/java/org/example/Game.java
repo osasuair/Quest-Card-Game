@@ -124,4 +124,8 @@ public class Game {
         output.println(message);
         output.flush();
     }
+
+    int computeTrim(Player player) {
+        return -1;
+    }
 }

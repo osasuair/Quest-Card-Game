@@ -516,5 +516,50 @@ class MainTest {
         assertTrue(output.toString().contains("Test Clear Hotseat"));
     }
 
+    @Test
+    @DisplayName("Game computes number of cards to trim for a player with more than 12 cards")
+    public void RESP_12_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        int excessCards = 3;
+        game.players[0].pickCards(game.adventureDeck.draw(excessCards));
 
+        // Act
+        int trim = game.computeTrim(game.players[0]);
+
+        // Assert
+        assertEquals(excessCards, trim);
+    }
+
+    @Test
+    @DisplayName("Game computes number of cards to trim for a player with 12 cards")
+    public void RESP_12_test_02() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+
+        // Act
+        int trim = game.computeTrim(game.players[0]);
+
+        // Assert
+        assertEquals(0, trim);
+    }
+
+    @Test
+    @DisplayName("Game computes number of cards to trim for a player with less than 12 cards")
+    public void RESP_12_test_03() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.players[0].pickCards(game.adventureDeck.draw(10));
+
+        // Act
+        int trim = game.computeTrim(game.players[0]);
+
+        // Assert
+        assertEquals(0, trim);
+    }
 }
