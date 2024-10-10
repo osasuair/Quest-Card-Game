@@ -42,6 +42,22 @@ public class Game {
 
         Card card = questDeck.draw();
         print("Player " + player + " drew " + card);
+
+        // Handle event card
+        if (card.type != 'Q') {
+            handleEventCard(player, card);
+        }
+    }
+
+    void handleEventCard(Player player, Card card) {
+        switch (card.cardType) {
+            case "Plague" -> handlePlague(player);
+        }
+    }
+
+    void handlePlague(Player player) {
+        print("Player " + player + " losses 2 shields");
+        player.shields  = (player.shields < 2) ? 0 : player.shields - 2;
     }
 
     void initPlayers() {
