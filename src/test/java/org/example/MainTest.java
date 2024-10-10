@@ -408,4 +408,43 @@ class MainTest {
         String expectedOutput = "Player P1 drew Plague";
         assertTrue(output.toString().contains(expectedOutput));
     }
+
+    @Test
+    @DisplayName("Game carries out Plague Event card effect (more than 1 shield)")
+    public void RESP_08_test_01() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        game.players[0].shields = 6;
+
+        // Manipulate the quest deck to ensure the first card is an Event card
+        Card eventCard = new Card("Plague"); // Example Event card
+        game.questDeck.add(List.of(eventCard));
+
+        // Act
+        game.playTurn(game.players[0]);
+
+        // Assert
+        assertEquals(4, game.players[0].shields);
+    }
+
+    @Test
+    @DisplayName("Game carries out Plague Event card effect (1 shield)")
+    public void RESP_08_test_02() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        game.players[0].shields = 1;
+
+        // Manipulate the quest deck to ensure the first card is an Event card
+        Card eventCard = new Card("Plague"); // Example Event card
+        game.questDeck.add(List.of(eventCard));
+
+        // Act
+        game.playTurn(game.players[0]);
+
+        // Assert
+        assertEquals(0, game.players[0].shields);
+    }
+
 }
