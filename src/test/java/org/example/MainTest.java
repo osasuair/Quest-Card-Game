@@ -13,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MainTest {
 
+    Scanner input = new Scanner("n\nn\nn\nn\n"); // Simulate user input for sponsor questions
+    PrintWriter output = new PrintWriter(System.out);
+
     @Test
     @DisplayName("Check Adventure Deck Size after Initialization")
     void RESP_01_test_01() {
@@ -148,7 +151,7 @@ class MainTest {
     @DisplayName("Check all Players have different decks of 12 cards")
     public void RESP_02_test_02() {
         // Arrange
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.adventureDeck.initAdventureDeck();
         game.questDeck.initQuestDeck();
         game.adventureDeck.shuffle();
@@ -173,7 +176,7 @@ class MainTest {
     @DisplayName("Game determines winners with 7 or more shields - No shields given")
     public void RESP_03_test_01() {
         // Arrange
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.adventureDeck.initAdventureDeck();
         game.initPlayers();
 
@@ -188,7 +191,7 @@ class MainTest {
     @DisplayName("Game determines winners with 7 or more shields - 1 player has 7 shields")
     public void RESP_03_test_02() {
         // Arrange
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.adventureDeck.initAdventureDeck();
         game.initPlayers();
         game.players[0].shields = 7;
@@ -205,7 +208,7 @@ class MainTest {
     @DisplayName("Game determines winners with 7 or more shields - 3 players have 7 shields")
     public void RESP_03_test_03() {
         // Arrange
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(System.out));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.adventureDeck.initAdventureDeck();
         game.initPlayers();
         game.players[0].shields = 7;
@@ -228,7 +231,7 @@ class MainTest {
     public void RESP_04_test_01() {
         // Arrange
         StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.players[0].shields = 7;
         game.players[2].shields = 8;
 
@@ -349,7 +352,7 @@ class MainTest {
     public void RESP_06_test_01() {
         // Arrange
         StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output)) {
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
             public void playTurn(Player player) {
                 print(player + "'s turn - Hand: " + player.getDeck());
                 if (currentPlayer == 2) players[0].shields = 7;
@@ -371,7 +374,7 @@ class MainTest {
     public void RESP_06_test_02() {
         // Arrange
         StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output)) {
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
             static int times = 0;
 
             public void playTurn(Player player) {
@@ -396,7 +399,7 @@ class MainTest {
     public void RESP_07_test_01() {
         // Arrange
         StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
 
         // Manipulate the quest deck to ensure the first card is an Event card
         Card eventCard = new Card("Plague"); // Example Event card
@@ -414,8 +417,7 @@ class MainTest {
     @DisplayName("Game carries out Plague Event card effect (more than 1 shield)")
     public void RESP_08_test_01() {
         // Arrange
-        StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.players[0].shields = 6;
 
         // Manipulate the quest deck to ensure the first card is a Plague card
@@ -433,8 +435,7 @@ class MainTest {
     @DisplayName("Game carries out Plague Event card effect (1 shield)")
     public void RESP_08_test_02() {
         // Arrange
-        StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.players[0].shields = 1;
 
         // Manipulate the quest deck to ensure the first card is a Plague card
@@ -452,8 +453,7 @@ class MainTest {
     @DisplayName("Game carries out Queen's Favor Event card effect")
     public void RESP_09_test_01() {
         // Arrange
-        StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         List<Card> advDeck = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'F', 15));
         List<Card> orgHand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'F', 15));
         game.adventureDeck.add(advDeck);
@@ -477,8 +477,7 @@ class MainTest {
     @DisplayName("Game carries out Prosperity Event card effect")
     public void RESP_10_test_01() {
         // Arrange
-        StringWriter output = new StringWriter();
-        Game game = new Game(PLAYERS_AMOUNT, new PrintWriter(output));
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.adventureDeck.initAdventureDeck();
         game.adventureDeck.shuffle();
 
@@ -494,4 +493,28 @@ class MainTest {
             assertEquals(2, game.players[i].getDeck().size());
         }
     }
+
+    @Test
+    @DisplayName("Game indicates when a turn has ended and clears the hotseat")
+    public void RESP_11_test_01() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Scanner input = new Scanner("\n"); // Simulate user input for sponsor questions
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)){
+            public void clearHotseat() { // Override clearHotseat to print a message that can be verified
+                print("Test Clear Hotseat");
+            }
+        };
+        game.questDeck.add(List.of(new Card("Plague")));
+
+        // Act
+        game.playTurn(game.players[0]);
+
+        // Assert
+        assertTrue(output.toString().contains("P1's turn is over, press Enter to continue"));
+        assertFalse(input.hasNextLine());  // Verify that 'Enter' key press is required to continue
+        assertTrue(output.toString().contains("Test Clear Hotseat"));
+    }
+
+
 }

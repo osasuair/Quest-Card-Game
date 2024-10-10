@@ -3,6 +3,7 @@ package org.example;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Game {
     final Player[] players;
@@ -10,7 +11,7 @@ public class Game {
     Deck adventureDeck, questDeck;
     PrintWriter output;
 
-    public Game(int playersAmount, PrintWriter output) {
+    public Game(int playersAmount, Scanner input, PrintWriter output) {
         this.output = output;
         currentPlayer = 0;
         adventureDeck = new Deck();
