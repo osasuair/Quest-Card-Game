@@ -53,6 +53,18 @@ public class Game {
         switch (card.cardType) {
             case "Plague" -> handlePlague(player);
             case "Queen’s favor" -> handleQueensFavor(player);
+            case "Prosperity" -> handleProsperity(player);
+        }
+    }
+
+    private void handleProsperity(Player player) {
+        print("All players draw 2 Adventure cards");
+        int currentPlayer = player.id - 1;
+        for (int i = 0; i < players.length; ++i) {
+            Player p = players[(currentPlayer + i) % players.length];
+            print("Player " + p + " draws 2 Adventure cards");
+            p.pickCards(adventureDeck.draw(2));
+            trimHand(p);
         }
     }
 
