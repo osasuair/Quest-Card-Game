@@ -52,7 +52,17 @@ public class Game {
     void handleEventCard(Player player, Card card) {
         switch (card.cardType) {
             case "Plague" -> handlePlague(player);
+            case "Queen’s favor" -> handleQueensFavor(player);
         }
+    }
+
+    void handleQueensFavor(Player player) {
+        print("Player " + player + " draws 2 Adventure cards");
+        player.pickCards(adventureDeck.draw(2));
+        trimHand(player);
+    }
+
+    void trimHand(Player player) {
     }
 
     void handlePlague(Player player) {
