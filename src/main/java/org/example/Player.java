@@ -21,6 +21,11 @@ class Player {
         return hand.asList().get(index);
     }
 
+    public Card playCard(Card card) {
+        hand.asList().remove(card);
+        return card;
+    }
+
     Deck getDeck() {
         sortHand();
         return hand;

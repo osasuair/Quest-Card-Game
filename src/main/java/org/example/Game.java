@@ -24,6 +24,12 @@ public class Game {
         }
     }
 
+    void initPlayers() {
+        for (Player player : players) {
+            player.pickCards(adventureDeck.draw(12));
+        }
+    }
+
     public void start() {
         adventureDeck.initAdventureDeck();
         questDeck.initQuestDeck();
@@ -82,17 +88,18 @@ public class Game {
     }
 
     void trimHand(Player player) {
+        int cardsToRemove = computeTrim(player);
+        if (cardsToRemove == 0) return;
+        print("Player " + player + " has more than 12 cards, select " + cardsToRemove + " cards to discard");
+        for(int i = 0; i < cardsToRemove; ++i) {
+            player.playCard(selectCard(player));
+            print(player + "'s trimmed hand: " + player.getDeck());
+        }
     }
 
     void handlePlague(Player player) {
         print("Player " + player + " losses 2 shields");
         player.shields  = (player.shields < 2) ? 0 : player.shields - 2;
-    }
-
-    void initPlayers() {
-        for (Player player : players) {
-            player.pickCards(adventureDeck.draw(12));
-        }
     }
 
     Card selectCard(Player player) {
