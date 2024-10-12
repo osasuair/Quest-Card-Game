@@ -660,4 +660,20 @@ class MainTest {
             assertTrue(output.toString().contains("P1's trimmed hand: " + orgHand.subList(i, size)));
         }
     }
+
+    @Test
+    @DisplayName("Game should refill decks with discard pile when empty")
+    public void RESP_15_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        game.adventureDeck.shuffle();
+        game.adventureDeck.discard(game.adventureDeck.draw(100));
+
+        // Act
+        game.adventureDeck.draw();
+
+        // Assert
+        assertEquals(99, game.adventureDeck.size());
+    }
 }

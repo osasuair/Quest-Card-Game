@@ -68,6 +68,9 @@ class Deck {
         return cards;
     }
 
+    void discard(List<Card> draw) {
+    }
+
     void add(List<Card> cards) {
         deck.addAll(cards);
     }
