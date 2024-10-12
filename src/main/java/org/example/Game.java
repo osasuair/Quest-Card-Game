@@ -92,6 +92,9 @@ public class Game {
         player.shields  = (player.shields < 2) ? 0 : player.shields - 2;
     }
 
+    void handleQuestCard(Player player, Card card) {
+    }
+
     Player findSponsor(int currentPlayer, Card card) {
         Player sponsor = null;
         for (int i = 0; i < players.length && sponsor == null; ++i) {

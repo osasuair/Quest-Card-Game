@@ -1159,4 +1159,43 @@ class MainTest {
         assertTrue(output.toString().contains("P1's trimmed hand: "));
     }
 
+    @Test
+    @DisplayName("Game ends quest if there is no sponsor")
+    public void RESP_23_test_01() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
+            Player findSponsor(int currentPlayer, Card card) { return null; }  // Mock no sponsor found
+        };
+
+        // Act
+        game.handleQuestCard(game.players[0], new Card("Quest", 'Q', 2));
+
+        // Assert
+        System.out.println(output);
+        assertTrue(output.toString().contains("No sponsor found for the Quest"));
+    }
+
+    @Test
+    @DisplayName("Game does not end quest if there is a sponsor")
+    public void RESP_23_test_02() {
+        // Arrange
+        Scanner input = new Scanner("");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
+            Player findSponsor(int currentPlayer, Card card) { return new Player(0); }  // Mock sponsor found
+        };
+
+        // Act
+        try {
+            game.handleQuestCard(game.players[0], new Card("Quest", 'Q', 2));
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        assertFalse(output.toString().contains("No sponsor found for quest"));
+    }
+
+
 }
