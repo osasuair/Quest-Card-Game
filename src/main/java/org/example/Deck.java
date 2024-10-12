@@ -17,6 +17,7 @@ class Deck {
     static final String[] EVENTS = {"Plague", "Queen’s favor", "Prosperity"};
 
     private final ArrayList<Card> deck = new ArrayList<>();
+    private final ArrayList<Card> discard = new ArrayList<>();
 
     void initAdventureDeck() {
         for (int i = 0; i < FOES_AMOUNT.length; ++i) {
@@ -51,8 +52,13 @@ class Deck {
     }
 
     Card draw() {
-        if (deck.isEmpty()) {
+        if (deck.isEmpty() && discard.isEmpty()) {
             return null;
+        }
+        if (deck.isEmpty()) {
+            deck.addAll(discard);
+            discard.clear();
+            shuffle();
         }
         return deck.removeFirst();
     }
@@ -68,7 +74,12 @@ class Deck {
         return cards;
     }
 
-    void discard(List<Card> draw) {
+    void discard(Card card) {
+        discard.add(card);
+    }
+
+    void discard(List<Card> cards) {
+        cards.forEach(this::discard);
     }
 
     void add(List<Card> cards) {

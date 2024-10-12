@@ -92,7 +92,7 @@ public class Game {
         if (cardsToRemove == 0) return;
         print("Player " + player + " has more than 12 cards, select " + cardsToRemove + " cards to discard");
         for(int i = 0; i < cardsToRemove; ++i) {
-            player.playCard(selectCard(player));
+            adventureDeck.discard(player.playCard(selectCard(player)));
             print(player + "'s trimmed hand: " + player.getDeck());
         }
     }
