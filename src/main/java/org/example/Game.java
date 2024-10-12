@@ -103,11 +103,13 @@ public class Game {
 
     List<Card> setupStage(Player sponsor, int currStage, List<Card> previousStage) {
         print("Player " + sponsor + ": ");
-        int dummy = 0;
-        while (dummy++ < 3) {
+        while (true) {
             print("Select a card for stage " + currStage + " or enter 'Quit' to finish stage setup");
             print(sponsor.getDeck());
             String cardIndex = input.nextLine();
+            if (cardIndex.equalsIgnoreCase("Quit")) {
+                break;
+            }
         }
         return new ArrayList<>();
     }
