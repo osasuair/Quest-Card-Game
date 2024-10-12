@@ -1233,4 +1233,94 @@ class MainTest {
         assertTrue(output.toString().contains("Select a card for the attack or enter 'Quit' to finish attack setup"));
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
     }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to attack or re-prompts if invalid - valid")
+    public void RESP_25_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\n1\nQuit\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'E', 30));
+        game.players[0].getDeck().add(hand);
+
+        // Act
+        List<Card> attack = game.setupAttack(game.players[0]);
+
+        // Assert
+        assertEquals(2, attack.size());
+        assertEquals(hand.getFirst(), attack.getFirst());
+        assertEquals(hand.getLast(), attack.getLast());
+    }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - invalid number")
+    public void RESP_25_test_02() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Scanner input = new Scanner("-1\n0\n1\nQuit\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'E', 30));
+        game.players[0].getDeck().add(hand);
+
+        // Act
+        List<Card> attack = game.setupAttack(game.players[0]);
+
+        // Assert
+        assertTrue(output.toString().contains("Invalid card index"));
+        assertEquals(2, attack.size());
+        assertEquals(hand.get(0), attack.get(0));
+        assertEquals(hand.get(2), attack.get(1));
+    }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - A Foe")
+    public void RESP_25_test_03() {
+        // Arrange
+        Scanner input = new Scanner("0\n2\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'F', 15),
+                                  new Card("Adv", 'H', 10));
+        game.players[0].getDeck().add(hand);
+
+        // Act
+        List<Card> attack = game.setupAttack(game.players[0]);
+
+        // Assert
+        assertTrue(output.toString().contains("Invalid card, Foe cards are not allowed in attack"));
+        assertEquals(1, attack.size());
+        assertEquals(hand.get(2), attack.getFirst());
+    }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - invalid repeated weapon")
+    public void RESP_25_test_04() {
+        // Arrange
+        Scanner input = new Scanner("0\n0\n0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'D', 5),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10));
+        game.players[0].getDeck().add(hand);
+
+        // Act
+        List<Card> selected = game.setupAttack(game.players[0]);
+
+        // Assert
+        System.out.println(output);
+        assertTrue(output.toString().contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
+        assertEquals(2, selected.size());
+        assertEquals(hand.getFirst(), selected.getFirst());
+        assertEquals(hand.get(2).value, selected.get(1).value);
+    }
 }
