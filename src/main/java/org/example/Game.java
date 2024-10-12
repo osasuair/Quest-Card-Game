@@ -93,6 +93,11 @@ public class Game {
     }
 
     void handleQuestCard(Player player, Card card) {
+        Player sponsor = findSponsor(player.id - 1, card);
+        if (sponsor == null) {
+            print("No sponsor found for the Quest");
+            return;
+        }
     }
 
     Player findSponsor(int currentPlayer, Card card) {
