@@ -162,6 +162,13 @@ public class Game {
     }
 
     List<Card> setupAttack(Player player) {
+        print("Player " + player + " setup attack");
+        while (true) {
+            print(player + "'s Deck: " + player.getDeck());
+            print("Select a card for the attack or enter 'Quit' to finish attack setup");
+            if (!input.hasNextLine()) break;
+            String cardIndex = input.nextLine();
+        }
         return new ArrayList<>();
     }
 
