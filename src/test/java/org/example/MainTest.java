@@ -676,4 +676,106 @@ class MainTest {
         // Assert
         assertEquals(99, game.adventureDeck.size());
     }
+
+    @Test
+    @DisplayName("Game prompts players to sponsor a quest")
+    public void RESP_16_test_01() {
+        // Arrange
+        Scanner input = new Scanner("y\n");  // Player 1 sponsors the quest
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        Card card = new Card("Quest", 'Q', 2);
+        int currentPlayer = 0;
+
+        // Act
+        Player sponsor = game.findSponsor(currentPlayer, card);
+
+        // Assert
+        assertTrue(output.toString().contains("P1: Do you want to sponsor the quest " + card + "? (y/n)"));
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+        assertEquals(game.players[0], sponsor);
+    }
+
+    @Test
+    @DisplayName("Game prompts players to sponsor a quest - player declines")
+    public void RESP_16_test_02() {
+        // Arrange
+        Scanner input = new Scanner("n\ny\n");  // Player 2 sponsors the quest
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        Card card = new Card("Quest", 'Q', 5);
+        int currentPlayer = 0;
+
+        // Act
+        Player sponsor = game.findSponsor(currentPlayer, card);
+
+        // Assert
+        assertTrue(output.toString().contains("P2: Do you want to sponsor the quest " + card + "? (y/n)"));
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+        assertEquals(game.players[1], sponsor);
+    }
+
+    @Test
+    @DisplayName("Game prompts players to sponsor a quest - asks all players")
+    public void RESP_16_test_03() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\ny\n");  // Player 4 sponsors the quest
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        Card card = new Card("Quest", 'Q', 3);
+        int currentPlayer = 0;
+
+        // Act
+        Player sponsor = game.findSponsor(currentPlayer, card);
+
+        // Assert
+        for (int i = currentPlayer; i < PLAYERS_AMOUNT; ++i) {
+            assertTrue(output.toString().contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
+        }
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+        assertEquals(game.players[3], sponsor);
+    }
+
+    @Test
+    @DisplayName("Game prompts players to sponsor a quest - all decline")
+    public void RESP_16_test_04() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\nn\n");  // No player sponsors the quest
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        Card card = new Card("Quest", 'Q', 4);
+        int currentPlayer = 0;
+
+        // Act
+        Player sponsor = game.findSponsor(currentPlayer, card);
+
+        // Assert
+        for (int i = currentPlayer; i < PLAYERS_AMOUNT; ++i) {
+            assertTrue(output.toString().contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
+        }
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+        assertNull(sponsor);
+    }
+
+    @Test
+    @DisplayName("Game prompts players to sponsor a quest - starts from non 0 position")
+    public void RESP_16_test_05() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\ny\n");  // Player 4 sponsors the quest
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        Card card = new Card("Quest", 'Q', 4);
+        int currentPlayer = 1;
+
+        // Act
+        Player sponsor = game.findSponsor(currentPlayer, card);
+
+        // Assert
+        for (int i = currentPlayer; i < PLAYERS_AMOUNT; ++i) {
+            assertTrue(output.toString().contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
+        }
+        assertFalse(output.toString().contains("P1: Do you want to sponsor the quest " + card + "? (y/n)"));
+        assertFalse(input.hasNextLine());  // Verify that the players was prompted
+        assertEquals(game.players[3], sponsor);
+    }
 }

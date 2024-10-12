@@ -102,6 +102,10 @@ public class Game {
         player.shields  = (player.shields < 2) ? 0 : player.shields - 2;
     }
 
+    Player findSponsor(int currentPlayer, Card card) {
+        return new Player(-1);
+    }
+
     Card selectCard(Player player) {
         Card card = null;
         while (card == null) {
