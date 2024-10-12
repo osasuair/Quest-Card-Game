@@ -87,23 +87,23 @@ public class Game {
         trimHand(player);
     }
 
-    void trimHand(Player player) {
-        int cardsToRemove = computeTrim(player);
-        if (cardsToRemove == 0) return;
-        print("Player " + player + " has more than 12 cards, select " + cardsToRemove + " cards to discard");
-        for(int i = 0; i < cardsToRemove; ++i) {
-            adventureDeck.discard(player.playCard(selectCard(player)));
-            print(player + "'s trimmed hand: " + player.getDeck());
-        }
-    }
-
     void handlePlague(Player player) {
         print("Player " + player + " losses 2 shields");
         player.shields  = (player.shields < 2) ? 0 : player.shields - 2;
     }
 
     Player findSponsor(int currentPlayer, Card card) {
-        return new Player(-1);
+        Player sponsor = null;
+        for (int i = 0; i < players.length && sponsor == null; ++i) {
+            Player p = players[(currentPlayer + i) % players.length];
+            sponsor = promptSponsor(p, card) ? p : null;
+        }
+        return sponsor;
+    }
+
+    boolean promptSponsor(Player p, Card c) {
+        print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
+        return input.nextLine().equals("y");
     }
 
     Card selectCard(Player player) {
@@ -120,6 +120,20 @@ public class Game {
         return card;
     }
 
+    void trimHand(Player player) {
+        int cardsToRemove = computeTrim(player);
+        if (cardsToRemove == 0) return;
+        print("Player " + player + " has more than 12 cards, select " + cardsToRemove + " cards to discard");
+        for(int i = 0; i < cardsToRemove; ++i) {
+            adventureDeck.discard(player.playCard(selectCard(player)));
+            print(player + "'s trimmed hand: " + player.getDeck());
+        }
+    }
+
+    int computeTrim(Player player) {
+        return player.hand.size() > 12 ? player.hand.size() - 12 : 0;
+    }
+
     List<Player> checkWinners() {
         ArrayList<Player> winners = new ArrayList<>();
         for (Player player : players) {
@@ -128,10 +142,6 @@ public class Game {
             }
         }
         return winners;
-    }
-
-    int computeTrim(Player player) {
-        return player.hand.size() > 12 ? player.hand.size() - 12 : 0;
     }
 
     void displayWinners(List<Player> winners) {
