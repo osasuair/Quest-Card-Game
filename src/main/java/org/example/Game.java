@@ -210,4 +210,8 @@ public class Game {
         output.println(message);
         output.flush();
     }
+
+    boolean playStage(List<Player> stagePlayers, List<Card> stage) {
+        return false;
+    }
 }

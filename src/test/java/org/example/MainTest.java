@@ -1019,4 +1019,25 @@ class MainTest {
         assertFalse(output.toString().contains("A stage cannot be empty"));
         assertTrue(output.toString().contains("Stage " + stage + ": " + selected));
     }
+
+    @Test
+    @DisplayName("Game determines and displays eligible participants for a stage")
+    public void RESP_20_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players));
+
+        // Act
+        try {
+            game.playStage(participants, new ArrayList<>());
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        assertTrue(output.toString().contains("Eligible Players: " + participants));
+    }
+
 }
