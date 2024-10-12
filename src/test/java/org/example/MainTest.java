@@ -815,4 +815,97 @@ class MainTest {
         assertTrue(output.toString().contains("Select a card for stage " + stage + " or enter 'Quit' to finish stage setup"));
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
     }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - valid")
+    public void RESP_18_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\n1\nQuit\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'H', 10));
+        game.players[0].getDeck().add(hand);
+        int stage = 1;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+
+        // Assert
+        assertEquals(2, selected.size());
+        assertEquals(hand.getFirst(), selected.getFirst());
+        assertEquals(hand.get(2), selected.getLast());
+    }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - invalid number")
+    public void RESP_18_test_02() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Scanner input = new Scanner("-1\n0\n1\nQuit\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'H', 10));
+        game.players[0].getDeck().add(hand);
+        int stage = 1;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+
+        // Assert
+        assertTrue(output.toString().contains("Invalid card index"));
+        assertEquals(2, selected.size());
+        assertEquals(hand.get(0), selected.get(0));
+        assertEquals(hand.get(2), selected.get(1));
+    }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - invalid foe")
+    public void RESP_18_test_03() {
+        // Arrange
+        Scanner input = new Scanner("1\n0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'F', 15),
+                                  new Card("Adv", 'H', 10));
+        game.players[0].getDeck().add(hand);
+        int stage = 1;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+
+        // Assert
+        assertTrue(output.toString().contains("Invalid card, only one foe card is allowed (Sole foe)"));
+        assertEquals(1, selected.size());
+        assertEquals(hand.get(1), selected.getFirst());
+    }
+
+    @Test
+    @DisplayName("Game adds a selected valid card to stage or re-prompts if invalid - invalid repeated weapon")
+    public void RESP_18_test_04() {
+        // Arrange
+        Scanner input = new Scanner("0\n0\n0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10));
+        game.players[0].getDeck().add(hand);
+        int stage = 1;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+
+        // Assert
+        assertTrue(output.toString().contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
+        assertEquals(2, selected.size());
+        assertEquals(hand.getFirst(), selected.getFirst());
+        assertEquals(hand.get(2).value, selected.get(1).value);
+    }
 }
