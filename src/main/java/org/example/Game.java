@@ -212,6 +212,7 @@ public class Game {
     }
 
     boolean playStage(List<Player> stagePlayers, List<Card> stage) {
+        print("Eligible Players: " + stagePlayers);
         return false;
     }
 }
