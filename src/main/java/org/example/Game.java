@@ -106,7 +106,7 @@ public class Game {
         return input.nextLine().equals("y");
     }
 
-    List<Card> setupStage(Player sponsor, int currStage, List<Card> previousStage) {
+    List<Card> setupStage(Player sponsor, int currStage, int previousStageValue) {
         List<Card> stage = new ArrayList<>();
         print("Player " + sponsor + ": ");
         while (true) {

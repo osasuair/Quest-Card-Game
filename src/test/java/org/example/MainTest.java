@@ -791,7 +791,7 @@ class MainTest {
         int stage = 1;
 
         // Act
-        game.setupStage(game.players[0], stage, /*previousStage*/ null);
+        game.setupStage(game.players[0], stage, /*previousStage*/ 0);
 
         // Assert
         assertTrue(output.toString().contains(game.players[0].getDeck().toString()));
@@ -809,7 +809,7 @@ class MainTest {
         int stage = 1;
 
         // Act
-        game.setupStage(game.players[0], stage, /*previousStage*/ null);
+        game.setupStage(game.players[0], stage, /*previousStage*/ 0);
 
         // Assert
         assertTrue(output.toString().contains("Select a card for stage " + stage + " or enter 'Quit' to finish stage setup"));
@@ -830,7 +830,7 @@ class MainTest {
         int stage = 1;
 
         // Act
-        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+        List<Card> selected = game.setupStage(game.players[0], stage, 0);
 
         // Assert
         assertEquals(2, selected.size());
@@ -853,7 +853,7 @@ class MainTest {
         int stage = 1;
 
         // Act
-        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+        List<Card> selected = game.setupStage(game.players[0], stage, 0);
 
         // Assert
         assertTrue(output.toString().contains("Invalid card index"));
@@ -877,7 +877,7 @@ class MainTest {
         int stage = 1;
 
         // Act
-        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+        List<Card> selected = game.setupStage(game.players[0], stage, 0);
 
         // Assert
         assertTrue(output.toString().contains("Invalid card, only one foe card is allowed (Sole foe)"));
@@ -900,12 +900,123 @@ class MainTest {
         int stage = 1;
 
         // Act
-        List<Card> selected = game.setupStage(game.players[0], stage, new ArrayList<>());
+        List<Card> selected = game.setupStage(game.players[0], stage, 0);
 
         // Assert
         assertTrue(output.toString().contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
         assertEquals(2, selected.size());
         assertEquals(hand.getFirst(), selected.getFirst());
         assertEquals(hand.get(2).value, selected.get(1).value);
+    }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during stage setup - stage empty")
+    public void RESP_19_test_01() {
+        // Arrange
+        Scanner input = new Scanner("Quit\n0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10));
+        game.players[0].getDeck().add(hand);
+        int stage = 1;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, 0);
+
+        // Assert
+        assertTrue(output.toString().contains("A stage cannot be empty"));
+        assertEquals(1, selected.size());
+        assertEquals(hand.getFirst(), selected.getFirst());
+    }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during stage setup - insufficient value")
+    public void RESP_19_test_02() {
+        // Arrange
+        Scanner input = new Scanner("0\n1\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'E', 30));
+        game.players[0].getDeck().add(hand);
+        int stage = 3;
+
+        // Act
+        assertThrows(NoSuchElementException.class, () -> game.setupStage(game.players[0], stage, 30));
+
+        // Assert
+        assertTrue(output.toString().contains("Insufficient value for this stage"));
+    }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during stage setup - insufficient value (equal)")
+    public void RESP_19_test_03() {
+        // Arrange
+        Scanner input = new Scanner("0\n0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'E', 30));
+        game.players[0].getDeck().add(hand);
+        int stage = 3;
+
+        // Act
+        assertThrows(NoSuchElementException.class, () -> game.setupStage(game.players[0], stage, 20));
+
+        // Assert
+        assertTrue(output.toString().contains("Insufficient value for this stage"));
+    }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during stage setup - valid (sufficient value)")
+    public void RESP_19_test_04() {
+        // Arrange
+        Scanner input = new Scanner("0\n2\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'E', 30));
+        game.players[0].getDeck().add(hand);
+        int stage = 3;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, 30);
+
+        // Assert
+        assertEquals(2, selected.size());
+        assertEquals(hand.get(0), selected.get(0));
+        assertEquals(hand.get(3), selected.get(1));
+        assertTrue(output.toString().contains("Stage " + stage + ": " + selected));
+    }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during stage setup - valid (first stage)")
+    public void RESP_19_test_05() {
+        // Arrange
+        Scanner input = new Scanner("0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'E', 30));
+        game.players[0].getDeck().add(hand);
+        int stage = 1;
+
+        // Act
+        List<Card> selected = game.setupStage(game.players[0], stage, 0);
+
+        // Assert
+        assertFalse(output.toString().contains("Insufficient value for this stage"));
+        assertFalse(output.toString().contains("A stage cannot be empty"));
+        assertTrue(output.toString().contains("Stage " + stage + ": " + selected));
     }
 }
