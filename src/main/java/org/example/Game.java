@@ -115,7 +115,15 @@ public class Game {
             String cardIndex = input.nextLine();
 
             if (cardIndex.equalsIgnoreCase("Quit")) {
-                break;
+                if (stage.isEmpty())
+                    print("A stage cannot be empty");
+                else if (!largerThanLastStage(stage, previousStageValue))
+                    print("Insufficient value for this stage");
+                else {
+                    print("Stage " + currStage + ": " + stage);
+                    break;
+                }
+                continue;
             }
 
             Card cardSelected = sponsor.getCard(Integer.parseInt(cardIndex));
@@ -138,6 +146,11 @@ public class Game {
 
     private boolean repeatedWeapon(Card cardSelected, List<Card> cards) {
         return cards.stream().anyMatch(card -> card.type == cardSelected.type);
+    }
+
+    private boolean largerThanLastStage(List<Card> currStage, int previousStageValue) {
+        int currentStageValue = currStage.stream().mapToInt(card -> card.value).sum();
+        return currentStageValue > previousStageValue;
     }
 
     Card selectCard(Player player) {
