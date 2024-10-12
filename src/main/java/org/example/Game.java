@@ -142,6 +142,8 @@ public class Game {
 
     boolean playStage(List<Player> stagePlayers, List<Card> stage) {
         print("Eligible Players: " + stagePlayers);
+        removeWithdrawnPlayers(stagePlayers);
+
         return false;
     }
 
@@ -156,6 +158,18 @@ public class Game {
     private boolean largerThanLastStage(List<Card> currStage, int previousStageValue) {
         int currentStageValue = currStage.stream().mapToInt(card -> card.value).sum();
         return currentStageValue > previousStageValue;
+    }
+
+    void removeWithdrawnPlayers(List<Player> stagePlayers) {
+        List<Player> playersToRemove = new ArrayList<>();
+        for (Player player : stagePlayers) {
+            print(player + ": Do you want to withdraw from the quest? (y/n)");
+            String answer = input.nextLine();
+            if (answer.equals("y")) {
+                playersToRemove.add(player);
+            }
+        }
+        stagePlayers.removeAll(playersToRemove);
     }
 
     Card selectCard(Player player) {
