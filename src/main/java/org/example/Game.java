@@ -101,22 +101,43 @@ public class Game {
         return sponsor;
     }
 
+    boolean promptSponsor(Player p, Card c) {
+        print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
+        return input.nextLine().equals("y");
+    }
+
     List<Card> setupStage(Player sponsor, int currStage, List<Card> previousStage) {
+        List<Card> stage = new ArrayList<>();
         print("Player " + sponsor + ": ");
         while (true) {
             print("Select a card for stage " + currStage + " or enter 'Quit' to finish stage setup");
             print(sponsor.getDeck());
             String cardIndex = input.nextLine();
+
             if (cardIndex.equalsIgnoreCase("Quit")) {
                 break;
             }
+
+            Card cardSelected = sponsor.getCard(Integer.parseInt(cardIndex));
+            if (cardSelected == null) {
+                print("Invalid card index");
+            } else if (multipleFoes(cardSelected, stage)) {
+                print("Invalid card, only one foe card is allowed (Sole foe)");
+            } else if (repeatedWeapon(cardSelected, stage)) {
+                print("Invalid card, Weapon cards must be different (non-repeated weapon card)");
+            } else {
+                stage.add(sponsor.playCard(cardSelected));
+            }
         }
-        return new ArrayList<>();
+        return stage;
     }
 
-    boolean promptSponsor(Player p, Card c) {
-        print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
-        return input.nextLine().equals("y");
+    private boolean multipleFoes(Card cardSelected, List<Card> cards) {
+        return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
+    }
+
+    private boolean repeatedWeapon(Card cardSelected, List<Card> cards) {
+        return cards.stream().anyMatch(card -> card.type == cardSelected.type);
     }
 
     Card selectCard(Player player) {
