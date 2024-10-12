@@ -64,9 +64,6 @@ class Deck {
     }
 
     List<Card> draw(int amount) {
-        if (deck.size() < amount) {
-            return null;
-        }
         List<Card> cards = new ArrayList<>();
         for (int i = 0; i < amount; ++i) {
             cards.add(draw());

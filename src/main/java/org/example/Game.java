@@ -144,6 +144,12 @@ public class Game {
         print("Eligible Players: " + stagePlayers);
         removeWithdrawnPlayers(stagePlayers);
 
+        for (Player player : stagePlayers) {
+            print(player + " draws 1 Adventure card");
+            player.pickCards(adventureDeck.draw(1));
+            trimHand(player);
+        }
+
         return false;
     }
 
