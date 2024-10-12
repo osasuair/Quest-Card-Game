@@ -101,6 +101,10 @@ public class Game {
         return sponsor;
     }
 
+    List<Card> setupStage(Player sponsor, int currStage, List<Card> previousStage) {
+        return new ArrayList<>();
+    }
+
     boolean promptSponsor(Player p, Card c) {
         print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
         return input.nextLine().equals("y");

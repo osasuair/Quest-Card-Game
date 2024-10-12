@@ -778,4 +778,60 @@ class MainTest {
         assertFalse(input.hasNextLine());  // Verify that the players was prompted
         assertEquals(game.players[3], sponsor);
     }
+
+    @Test
+    @DisplayName("Game displays hand during stage setup")
+    public void RESP_17_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        int stage = 1;
+
+        // Act
+        assertThrows(NoSuchElementException.class, () -> game.setupStage(game.players[0], stage, /*previousStage*/ null));
+
+        // Assert
+        assertTrue(output.toString().contains(game.players[0].getDeck().toString()));
+    }
+
+    @Test
+    @DisplayName("Game prompts sponsor to select cards for stage - number")
+    public void RESP_17_test_02() {
+        // Arrange
+        Scanner input = new Scanner("0\n1\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        int stage = 1;
+
+        // Act
+        assertThrows(NoSuchElementException.class, () -> game.setupStage(game.players[0], stage, /*previousStage*/ null));
+
+        // Assert
+        assertTrue(output.toString().contains("Select a card for stage " + stage + " or enter 'Quit' to finish stage setup"));
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+    }
+
+    @Test
+    @DisplayName("Game prompts sponsor to select cards for stage - 'quit")
+    public void RESP_17_test_03() {
+        // Arrange
+        Scanner input = new Scanner("quit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        int stage = 1;
+
+        // Act
+        assertThrows(NoSuchElementException.class, () -> game.setupStage(game.players[0], stage, /*previousStage*/ null));
+
+        // Assert
+        assertTrue(output.toString().contains("Select a card for stage " + stage + " or enter 'Quit' to finish stage setup"));
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+    }
 }
