@@ -1110,4 +1110,53 @@ class MainTest {
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
     }
 
+    @Test
+    @DisplayName("Game draws 1 adventure card for each participant in stage")
+    public void RESP_22_test_01() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        game.adventureDeck.initAdventureDeck();
+        int deckSize = game.adventureDeck.size();
+
+        // Act
+        try {
+            game.playStage(participants, new ArrayList<>());
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        assertEquals(deckSize - participants.size(), game.adventureDeck.size());
+        for (Player p : participants)
+            assertTrue(output.toString().contains(p + " draws 1 Adventure card"));
+    }
+
+    @Test
+    @DisplayName("Game draws 1 adventure card for each participant in stage - trim required")
+    public void RESP_22_test_02() {
+        // Arrange
+        Scanner input = new Scanner("n\ny\ny\n0\n");  // only P1 tackles the stage and trims first card
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        int deckSize = game.adventureDeck.size();
+
+        // Act
+        try {
+            game.playStage(participants, new ArrayList<>());
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        assertEquals(deckSize - 1, game.adventureDeck.size());
+        assertEquals(12, game.players[0].getDeck().size());
+        assertTrue(output.toString().contains("P1's trimmed hand: "));
+    }
+
 }
