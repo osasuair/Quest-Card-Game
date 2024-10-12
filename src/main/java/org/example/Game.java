@@ -161,6 +161,10 @@ public class Game {
         return false;
     }
 
+    List<Card> setupAttack(Player player) {
+        return new ArrayList<>();
+    }
+
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
         return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
     }

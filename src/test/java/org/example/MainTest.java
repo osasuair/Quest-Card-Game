@@ -1197,5 +1197,40 @@ class MainTest {
         assertFalse(output.toString().contains("No sponsor found for quest"));
     }
 
+    @Test
+    @DisplayName("Game displays hand during attack setup")
+    public void RESP_24_test_01() {
+        // Arrange
+        Scanner input = new Scanner("0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        Player p1 = game.players[0];
 
+        // Act
+        game.setupAttack(p1);
+
+        // Assert
+        assertTrue(output.toString().contains(p1 + "'s Deck: " + p1.getDeck()));
+    }
+
+    @Test
+    @DisplayName("Game prompts participant to select a card for attack")
+    public void RESP_24_test_02() {
+        // Arrange
+        Scanner input = new Scanner("0\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        Player p1 = game.players[0];
+
+        // Act
+        game.setupAttack(p1);
+
+        // Assert
+        assertTrue(output.toString().contains("Select a card for the attack or enter 'Quit' to finish attack setup"));
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+    }
 }
