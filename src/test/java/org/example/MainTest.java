@@ -1040,4 +1040,74 @@ class MainTest {
         assertTrue(output.toString().contains("Eligible Players: " + participants));
     }
 
+    @Test
+    @DisplayName("Game prompts eligible participants to withdraw or participate in a stage")
+    public void RESP_21_test_01() {
+        // Arrange
+        Scanner input = new Scanner("n\ny\nn\nn\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players));
+
+        // Act
+        try {
+            game.playStage(participants, new ArrayList<>());
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        for (Player p : game.players)
+            assertTrue(output.toString().contains(p + ": Do you want to withdraw from the quest? (y/n)"));
+        List<Player> expectedParticipants = new ArrayList<>(Arrays.asList(game.players[0], game.players[2], game.players[3]));
+        assertEquals(expectedParticipants, participants);
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+    }
+
+    @Test
+    @DisplayName("Game prompts eligible participants to withdraw or participate in a stage - all withdraw")
+    public void RESP_21_test_02() {
+        // Arrange
+        Scanner input = new Scanner("y\ny\ny\ny\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players));
+
+        // Act
+        try {
+            game.playStage(participants, new ArrayList<>());
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        for (Player p : game.players)
+            assertTrue(output.toString().contains(p + ": Do you want to withdraw from the quest? (y/n)"));
+        assertTrue(participants.isEmpty());
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+    }
+
+    @Test
+    @DisplayName("Game prompts eligible participants to withdraw or participate in a stage - all participate")
+    public void RESP_21_test_03() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\nn\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players));
+
+        // Act
+        try {
+            game.playStage(participants, new ArrayList<>());
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        for (Player p : game.players)
+            assertTrue(output.toString().contains(p + ": Do you want to withdraw from the quest? (y/n)"));
+        assertEquals(Arrays.asList(game.players), participants);
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted
+    }
+
 }

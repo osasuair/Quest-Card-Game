@@ -140,6 +140,11 @@ public class Game {
         return stage;
     }
 
+    boolean playStage(List<Player> stagePlayers, List<Card> stage) {
+        print("Eligible Players: " + stagePlayers);
+        return false;
+    }
+
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
         return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
     }
@@ -209,10 +214,5 @@ public class Game {
     void print(Object message) {
         output.println(message);
         output.flush();
-    }
-
-    boolean playStage(List<Player> stagePlayers, List<Card> stage) {
-        print("Eligible Players: " + stagePlayers);
-        return false;
     }
 }
