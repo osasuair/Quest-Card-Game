@@ -162,14 +162,26 @@ public class Game {
     }
 
     List<Card> setupAttack(Player player) {
+        List<Card> attack = new ArrayList<>();
         print("Player " + player + " setup attack");
         while (true) {
             print(player + "'s Deck: " + player.getDeck());
             print("Select a card for the attack or enter 'Quit' to finish attack setup");
-            if (!input.hasNextLine()) break;
             String cardIndex = input.nextLine();
+            if (!input.hasNextLine()) break;
+
+            Card card = player.getCard(Integer.parseInt(cardIndex));
+            if (card == null) {
+                print("Invalid card index");
+            } else if (card.type == 'F') {
+                print("Invalid card, Foe cards are not allowed in attack");
+            } else if (repeatedWeapon(card, attack)) {
+                print("Invalid card, Weapon cards must be different (non-repeated weapon card)");
+            } else {
+                attack.add(player.playCard(card));
+            }
         }
-        return new ArrayList<>();
+        return attack;
     }
 
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
