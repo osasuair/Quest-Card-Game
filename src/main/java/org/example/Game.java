@@ -197,7 +197,8 @@ public class Game {
     }
 
     boolean resolveAttack(List<Card> attack, int stageValue) {
-        return false;
+        int attackPower = attack.stream().mapToInt(card -> card.value).sum();
+        return attackPower >= stageValue;
     }
 
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
