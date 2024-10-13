@@ -83,6 +83,10 @@ class Deck {
         deck.addAll(cards);
     }
 
+    void remove(List<Card> removeList) {
+        deck.removeAll(removeList);
+    }
+
     List<Card> asList() {
         return deck;
     }

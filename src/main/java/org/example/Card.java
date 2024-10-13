@@ -41,4 +41,15 @@ class Card implements Comparable<Card> {
         }
         return value - card.value;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Card other)) {
+            return false;
+        }
+        return type == other.type && value == other.value && cardType.equals(other.cardType);
+    }
 }

@@ -28,13 +28,16 @@ public class Game {
         }
     }
 
-    public void start() {
+    void setupGame() {
         adventureDeck.initAdventureDeck();
         questDeck.initQuestDeck();
         adventureDeck.shuffle();
         questDeck.shuffle();
-
         initPlayers();
+    }
+
+    public void start() {
+        setupGame();
         List<Player> winners;
         do {
             Player player = players[currentPlayer];
