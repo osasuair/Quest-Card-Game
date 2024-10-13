@@ -157,7 +157,7 @@ public class Game {
         }
 
         Map<Player, List<Card>> attacks = setupAttacks(stagePlayers);
-        return false;
+        return resolveAttacks(stagePlayers, attacks, stage.stream().mapToInt(card -> card.value).sum());
     }
 
     Map<Player, List<Card>> setupAttacks(List<Player> stagePlayers) {
@@ -196,8 +196,18 @@ public class Game {
         return attack;
     }
 
-    boolean resolveAttacks(List<Player> participants, Map<Player, List<Card>> attacks, int stageValue) {
-        return false;
+    boolean resolveAttacks(List<Player> stagePlayers, Map<Player, List<Card>> attacks, int stageValue) {
+        List<Player> playersToRemove = new ArrayList<>();
+        for (Player player : stagePlayers) {
+            if (resolveAttack(attacks.get(player), stageValue))
+                print("Player " + player + " passed the stage");
+            else {
+                playersToRemove.add(player);
+                print("Player " + player + " failed the quest");
+            }
+        }
+        stagePlayers.removeAll(playersToRemove);
+        return !stagePlayers.isEmpty();
     }
 
     boolean resolveAttack(List<Card> attack, int stageValue) {
