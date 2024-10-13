@@ -97,6 +97,18 @@ public class Game {
             return;
         }
         List<List<Card>> stages = setupQuest(sponsor, card);
+        List<Player> winners = playQuest(sponsor, stages);
+
+        if (!winners.isEmpty()) {
+            print("Players " + winners + " win the quest and gain " + card.value + " shields");
+            // Update winners
+            for (Player p : winners) {
+                p.shields += card.value;
+                print("Player " + p + " now has " + p.shields + " shields");
+            }
+        } else {
+            print("No winners for the quest");
+        }
     }
 
     List<List<Card>> setupQuest(Player sponsor, Card card) {
