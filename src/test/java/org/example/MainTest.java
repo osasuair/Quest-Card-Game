@@ -1785,4 +1785,31 @@ class MainTest {
         assertEquals(12, sponsor.hand.size());
         assertFalse(input.hasNextLine());  // Verify that the player was prompted to trim
     }
+
+    @Test
+    @DisplayName("Game cleans up after quest is complete")
+    public void RESP_37_test_01() {
+        // Arrange
+        Scanner input = new Scanner("y\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            List<List<Card>> setupQuest(Player sponsor, Card card) {
+                return getQuestSetup(2);
+            }
+
+            List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
+                return List.of(players[1], players[3]);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        initSponsorHand(sponsor);
+        Card questCard = new Card("Quest", 'Q', 2);
+
+        // Act
+        game.handleQuestCard(sponsor, questCard);
+
+        // Assert
+        assertEquals(5 + 2 + 2, sponsor.hand.size()); // 5 (Sponsor's hand) + 2 (1 card per stage) + 2 (num of stages)
+        assertEquals(2, game.adventureDeck.discardSize());  // 2 cards used to build the quest
+    }
 }
