@@ -1812,4 +1812,24 @@ class MainTest {
         assertEquals(5 + 2 + 2, sponsor.hand.size()); // 5 (Sponsor's hand) + 2 (1 card per stage) + 2 (num of stages)
         assertEquals(2, game.adventureDeck.discardSize());  // 2 cards used to build the quest
     }
+
+    @Test
+    @DisplayName("Game carries out actions triggered by Quest Card")
+    public void RESP_38_test_01() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
+            void handleQuestCard(Player player, Card card) {
+                print("handleQuestCard(" + card + ")");
+            }
+        };
+        Card questCard = new Card("Quest", 'Q', 4);
+        game.questDeck.add(List.of(questCard));
+
+        // Act
+        game.playTurn(game.players[2]);
+
+        // Assert
+        assertTrue(output.toString().contains("handleQuestCard(" + questCard + ")"));
+    }
 }
