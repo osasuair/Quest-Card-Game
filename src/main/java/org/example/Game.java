@@ -98,6 +98,10 @@ public class Game {
         }
     }
 
+    List<List<Card>> setupQuest(Player sponsor, Card card) {
+        return new ArrayList<>();
+    }
+
     Player findSponsor(int currentPlayer, Card card) {
         Player sponsor = null;
         for (int i = 0; i < players.length && sponsor == null; ++i) {

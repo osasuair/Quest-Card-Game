@@ -1554,6 +1554,60 @@ class MainTest {
         assertEquals(3 + 3, game.adventureDeck.discardSize());
     }
 
+    @Test
+    @DisplayName("Game sets up stages of a quest")
+    public void RESP_32_test_01() {
+        // Arrange
+        String inputStr = "0\nQuit\n" +    // Stage 1
+                          "1\nQuit\n" +    // Stage 2
+                          "0\n0\nQuit\n" + // Stage 3
+                          "0\nQuit\n";     // Stage 4
+        Scanner input = new Scanner(inputStr);
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        initSponsorHand(sponsor);
+        Card card = new Card("Quest", 'Q', 4);
+
+        // Act
+        List<List<Card>> questSetup = game.setupQuest(sponsor, card);
+
+        // Assert
+        assertEquals(card.value, questSetup.size());
+        int previous = 0;
+        for (List<Card> stage : questSetup) {
+            int value = stage.stream().mapToInt(c -> c.value).sum();
+            assertTrue(value > previous);
+            previous = value;
+        }
+    }
+
+    @Test
+    @DisplayName("Game sets up the quest Stages")
+    public void RESP_32_test_02() {
+        // Arrange
+        Scanner input = new Scanner("y\n" +   // Sponsor
+                                    "0\nQuit\n" +    // Stage 1
+                                    "1\nQuit\n" +    // Stage 2
+                                    "0\n0\nQuit\n" + // Stage 3
+                                    "0\nQuit\n");    // Stage 4
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        initSponsorHand(sponsor);  // Sponsor has 5 cards
+
+        // Act
+        try {
+            // Sponsor uses 5 cards to set up the quest
+            game.handleQuestCard(sponsor, new Card("Quest", 'Q', 4));
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException
+        }
+
+        // Assert
+        assertEquals(0, sponsor.getDeck().size());
+    }
+
 
     private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
         Map<Player, List<Card>> attacks = new HashMap<>();
@@ -1569,5 +1623,13 @@ class MainTest {
         attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
         attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
         return attacks;
+    }
+
+    private static void initSponsorHand(Player sponsor) {
+        sponsor.getDeck().add(List.of(new Card("Adv", 'F', 5),
+                                      new Card("Adv", 'F', 5),
+                                      new Card("Adv", 'S', 10),
+                                      new Card("Adv", 'H', 10),
+                                      new Card("Adv", 'E', 30)));
     }
 }
