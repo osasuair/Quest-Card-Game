@@ -1708,6 +1708,30 @@ class MainTest {
             assertEquals(0, p.shields);
     }
 
+    @Test
+    @DisplayName("Game discards all cards used by sponsor to build the quest")
+    public void RESP_35_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            List<List<Card>> setupQuest(Player sponsor, Card card) {
+                return new ArrayList<>();
+            }
+            List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
+                return List.of(players[1], players[3]);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        int stages = 5;
+        List<List<Card>> questSetup = getQuestSetup(stages);
+
+        // Act
+        game.cleanupQuest(sponsor, questSetup);  // get Quest Setup adds 1 card per stage
+
+        // Assert
+        assertEquals(stages, game.adventureDeck.discardSize());
+    }
+
     private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
         Map<Player, List<Card>> attacks = new HashMap<>();
         attacks.put(participants.get(0), List.of(new Card("Adv", 'E', 30))); // attack > stage
@@ -1727,7 +1751,8 @@ class MainTest {
     private static List<List<Card>> getQuestSetup(int stages) {
         List<List<Card>> questSetup = new ArrayList<>();
         for (int i = 0; i < stages; i++) {
-            List<Card> stage = new ArrayList<>();
+            List<Card> stage = List.of(new Card("Adv", 'H', 10),
+                                       new Card("Adv", 'H', 10));
             questSetup.add(stage);
         }
         return questSetup;

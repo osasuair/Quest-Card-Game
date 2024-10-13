@@ -254,6 +254,9 @@ public class Game {
         return attackPower >= stageValue;
     }
 
+    void cleanupQuest(Player sponsor, List<List<Card>> stageSetup) {
+    }
+
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
         return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
     }
