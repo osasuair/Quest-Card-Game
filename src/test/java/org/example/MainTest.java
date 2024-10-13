@@ -16,6 +16,40 @@ class MainTest {
     Scanner input = new Scanner("n\nn\nn\nn\n"); // Simulate user input for sponsor questions
     PrintWriter output = new PrintWriter(System.out);
 
+    private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
+        Map<Player, List<Card>> attacks = new HashMap<>();
+        attacks.put(participants.get(0), List.of(new Card("Adv", 'E', 30))); // attack > stage
+        attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
+        attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
+        return attacks;
+    }
+
+    private static Map<Player, List<Card>> getAttack2(List<Player> participants) {
+        Map<Player, List<Card>> attacks = new HashMap<>();
+        attacks.put(participants.get(0), List.of(new Card("Adv", 'H', 10)));
+        attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
+        attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
+        return attacks;
+    }
+
+    private static List<List<Card>> getQuestSetup(int stages) {
+        List<List<Card>> questSetup = new ArrayList<>();
+        for (int i = 0; i < stages; i++) {
+            List<Card> stage = List.of(new Card("Adv", 'H', 10));
+            questSetup.add(stage);
+        }
+        return questSetup;
+    }
+
+    private static void initSponsorHand(Player sponsor) {
+        sponsor.getDeck()
+                .add(List.of(new Card("Adv", 'F', 5),
+                             new Card("Adv", 'F', 5),
+                             new Card("Adv", 'S', 10),
+                             new Card("Adv", 'H', 10),
+                             new Card("Adv", 'E', 30)));
+    }
+
     @Test
     @DisplayName("Check Adventure Deck Size after Initialization")
     void RESP_01_test_01() {
@@ -301,13 +335,12 @@ class MainTest {
     public void RESP_05_test_03() {
         // Arrange
         Player player = new Player(1);
-        List<Card> cards = new ArrayList<>(Arrays.asList(
-                new Card("Adv", 'F', 5),
-                new Card("Adv", 'F', 10),
-                new Card("Adv", 'F', 15),
-                new Card("Adv", 'S', 10),
-                new Card("Adv", 'H', 10),
-                new Card("Adv", 'B', 15)));
+        List<Card> cards = new ArrayList<>(Arrays.asList(new Card("Adv", 'F', 5),
+                                                         new Card("Adv", 'F', 10),
+                                                         new Card("Adv", 'F', 15),
+                                                         new Card("Adv", 'S', 10),
+                                                         new Card("Adv", 'H', 10),
+                                                         new Card("Adv", 'B', 15)));
         List<Card> shuffled = new ArrayList<>(cards);
         Collections.shuffle(shuffled);
         player.pickCards(shuffled);
@@ -326,13 +359,12 @@ class MainTest {
     public void RESP_05_test_04() {
         // Arrange
         Player player = new Player(1);
-        List<Card> cards = new ArrayList<>(Arrays.asList(
-                new Card("Adv", 'S', 10),
-                new Card("Adv", 'S', 10),
-                new Card("Adv", 'H', 10),
-                new Card("Adv", 'H', 10),
-                new Card("Adv", 'H', 10),
-                new Card("Adv", 'H', 10)));
+        List<Card> cards = new ArrayList<>(Arrays.asList(new Card("Adv", 'S', 10),
+                                                         new Card("Adv", 'S', 10),
+                                                         new Card("Adv", 'H', 10),
+                                                         new Card("Adv", 'H', 10),
+                                                         new Card("Adv", 'H', 10),
+                                                         new Card("Adv", 'H', 10)));
         List<Card> shuffled = new ArrayList<>(cards);
         Collections.shuffle(shuffled);
         player.pickCards(shuffled);
@@ -500,7 +532,7 @@ class MainTest {
         // Arrange
         StringWriter output = new StringWriter();
         Scanner input = new Scanner("\n"); // Simulate user input for sponsor questions
-        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)){
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
             public void clearHotseat() { // Override clearHotseat to print a message that can be verified
                 print("Test Clear Hotseat");
             }
@@ -730,7 +762,8 @@ class MainTest {
 
         // Assert
         for (int i = currentPlayer; i < PLAYERS_AMOUNT; ++i) {
-            assertTrue(output.toString().contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
+            assertTrue(output.toString()
+                               .contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
         }
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
         assertEquals(game.players[3], sponsor);
@@ -751,7 +784,8 @@ class MainTest {
 
         // Assert
         for (int i = currentPlayer; i < PLAYERS_AMOUNT; ++i) {
-            assertTrue(output.toString().contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
+            assertTrue(output.toString()
+                               .contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
         }
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
         assertNull(sponsor);
@@ -772,7 +806,8 @@ class MainTest {
 
         // Assert
         for (int i = currentPlayer; i < PLAYERS_AMOUNT; ++i) {
-            assertTrue(output.toString().contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
+            assertTrue(output.toString()
+                               .contains("P" + (i + 1) + ": Do you want to sponsor the quest " + card + "? (y/n)"));
         }
         assertFalse(output.toString().contains("P1: Do you want to sponsor the quest " + card + "? (y/n)"));
         assertFalse(input.hasNextLine());  // Verify that the players was prompted
@@ -812,7 +847,8 @@ class MainTest {
         game.setupStage(game.players[0], stage, /*previousStage*/ 0);
 
         // Assert
-        assertTrue(output.toString().contains("Select a card for stage " + stage + " or enter 'Quit' to finish stage setup"));
+        assertTrue(output.toString()
+                           .contains("Select a card for stage " + stage + " or enter 'Quit' to finish stage setup"));
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
     }
 
@@ -823,9 +859,7 @@ class MainTest {
         Scanner input = new Scanner("0\n1\nQuit\n");
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'F', 10),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'H', 10));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'S', 10), new Card("Adv", 'H', 10));
         game.players[0].getDeck().add(hand);
         int stage = 1;
 
@@ -846,9 +880,7 @@ class MainTest {
         Scanner input = new Scanner("-1\n0\n1\nQuit\n");
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'F', 10),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'H', 10));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'S', 10), new Card("Adv", 'H', 10));
         game.players[0].getDeck().add(hand);
         int stage = 1;
 
@@ -870,9 +902,7 @@ class MainTest {
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'F', 10),
-                                  new Card("Adv", 'F', 15),
-                                  new Card("Adv", 'H', 10));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'F', 15), new Card("Adv", 'H', 10));
         game.players[0].getDeck().add(hand);
         int stage = 1;
 
@@ -893,9 +923,7 @@ class MainTest {
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'F', 10),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'S', 10), new Card("Adv", 'S', 10));
         game.players[0].getDeck().add(hand);
         int stage = 1;
 
@@ -903,7 +931,8 @@ class MainTest {
         List<Card> selected = game.setupStage(game.players[0], stage, 0);
 
         // Assert
-        assertTrue(output.toString().contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
+        assertTrue(output.toString()
+                           .contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
         assertEquals(2, selected.size());
         assertEquals(hand.getFirst(), selected.getFirst());
         assertEquals(hand.get(2).value, selected.get(1).value);
@@ -916,9 +945,7 @@ class MainTest {
         Scanner input = new Scanner("Quit\n0\nQuit\n");
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
-        List<Card> hand = List.of(new Card("Adv", 'F', 10),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'S', 10), new Card("Adv", 'S', 10));
         game.players[0].getDeck().add(hand);
         int stage = 1;
 
@@ -1059,7 +1086,9 @@ class MainTest {
         // Assert
         for (Player p : game.players)
             assertTrue(output.toString().contains(p + ": Do you want to withdraw from the quest? (y/n)"));
-        List<Player> expectedParticipants = new ArrayList<>(Arrays.asList(game.players[0], game.players[2], game.players[3]));
+        List<Player> expectedParticipants = new ArrayList<>(Arrays.asList(game.players[0],
+                                                                          game.players[2],
+                                                                          game.players[3]));
         assertEquals(expectedParticipants, participants);
         assertFalse(input.hasNextLine());  // Verify that the player was prompted
     }
@@ -1165,7 +1194,9 @@ class MainTest {
         // Arrange
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
-            Player findSponsor(int currentPlayer, Card card) { return null; }  // Mock no sponsor found
+            Player findSponsor(int currentPlayer, Card card) {
+                return null;
+            }  // Mock no sponsor found
         };
 
         // Act
@@ -1183,7 +1214,9 @@ class MainTest {
         Scanner input = new Scanner("");
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
-            Player findSponsor(int currentPlayer, Card card) { return new Player(0); }  // Mock sponsor found
+            Player findSponsor(int currentPlayer, Card card) {
+                return new Player(0);
+            }  // Mock sponsor found
         };
 
         // Act
@@ -1241,9 +1274,7 @@ class MainTest {
         Scanner input = new Scanner("0\n1\nQuit\n");
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'E', 30));
+        List<Card> hand = List.of(new Card("Adv", 'S', 10), new Card("Adv", 'S', 10), new Card("Adv", 'E', 30));
         game.players[0].getDeck().add(hand);
 
         // Act
@@ -1263,9 +1294,7 @@ class MainTest {
         Scanner input = new Scanner("-1\n0\n1\nQuit\n");
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'E', 30));
+        List<Card> hand = List.of(new Card("Adv", 'S', 10), new Card("Adv", 'S', 10), new Card("Adv", 'E', 30));
         game.players[0].getDeck().add(hand);
 
         // Act
@@ -1286,9 +1315,7 @@ class MainTest {
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'F', 10),
-                                  new Card("Adv", 'F', 15),
-                                  new Card("Adv", 'H', 10));
+        List<Card> hand = List.of(new Card("Adv", 'F', 10), new Card("Adv", 'F', 15), new Card("Adv", 'H', 10));
         game.players[0].getDeck().add(hand);
 
         // Act
@@ -1308,9 +1335,7 @@ class MainTest {
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.adventureDeck.initAdventureDeck();
-        List<Card> hand = List.of(new Card("Adv", 'D', 5),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10));
+        List<Card> hand = List.of(new Card("Adv", 'D', 5), new Card("Adv", 'S', 10), new Card("Adv", 'S', 10));
         game.players[0].getDeck().add(hand);
 
         // Act
@@ -1318,7 +1343,8 @@ class MainTest {
 
         // Assert
         System.out.println(output);
-        assertTrue(output.toString().contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
+        assertTrue(output.toString()
+                           .contains("Invalid card, Weapon cards must be different (non-repeated weapon card)"));
         assertEquals(2, selected.size());
         assertEquals(hand.getFirst(), selected.getFirst());
         assertEquals(hand.get(2).value, selected.get(1).value);
@@ -1331,9 +1357,7 @@ class MainTest {
         Scanner input = new Scanner("Quit\n");
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
-        List<Card> hand = List.of(new Card("Adv", 'D', 5),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10));
+        List<Card> hand = List.of(new Card("Adv", 'D', 5), new Card("Adv", 'S', 10), new Card("Adv", 'S', 10));
         game.players[0].getDeck().add(hand);
 
         // Act
@@ -1351,9 +1375,7 @@ class MainTest {
         Scanner input = new Scanner("0\n1\nQuit\n");
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
-        List<Card> hand = List.of(new Card("Adv", 'D', 5),
-                                  new Card("Adv", 'S', 10),
-                                  new Card("Adv", 'S', 10));
+        List<Card> hand = List.of(new Card("Adv", 'D', 5), new Card("Adv", 'S', 10), new Card("Adv", 'S', 10));
         game.players[0].getDeck().add(hand);
 
         // Act
@@ -1374,8 +1396,7 @@ class MainTest {
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
             List<Card> setupAttack(Player p) {  // Mock setup attack to return an easily verifiable attack
-                if (p.id == 1)
-                    return List.of(new Card("Adv", 'S', 10));
+                if (p.id == 1) return List.of(new Card("Adv", 'S', 10));
                 return p.getDeck().asList().subList(0, 2);
             }
         };
@@ -1422,8 +1443,7 @@ class MainTest {
     public void RESP_28_test_01() {
         // Arrange
         Game game = new Game(PLAYERS_AMOUNT, input, output);
-        List<Card> attack = List.of(new Card("Adv", 'S', 10),
-                                    new Card("Adv", 'H', 10));
+        List<Card> attack = List.of(new Card("Adv", 'S', 10), new Card("Adv", 'H', 10));
 
         // Act
         boolean successEquals = game.resolveAttack(attack, 20);
@@ -1663,6 +1683,7 @@ class MainTest {
             List<List<Card>> setupQuest(Player sponsor, Card card) {
                 return new ArrayList<>();
             }
+
             List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
                 return List.of(players[1], players[3]);
             }
@@ -1691,6 +1712,7 @@ class MainTest {
             List<List<Card>> setupQuest(Player sponsor, Card card) {
                 return new ArrayList<>();
             }
+
             List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
                 return new ArrayList<>();
             }
@@ -1716,6 +1738,7 @@ class MainTest {
             List<List<Card>> setupQuest(Player sponsor, Card card) {
                 return new ArrayList<>();
             }
+
             List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
                 return List.of(players[1], players[3]);
             }
@@ -1730,39 +1753,5 @@ class MainTest {
 
         // Assert
         assertEquals(stages, game.adventureDeck.discardSize());
-    }
-
-    private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
-        Map<Player, List<Card>> attacks = new HashMap<>();
-        attacks.put(participants.get(0), List.of(new Card("Adv", 'E', 30))); // attack > stage
-        attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
-        attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
-        return attacks;
-    }
-
-    private static Map<Player, List<Card>> getAttack2(List<Player> participants) {
-        Map<Player, List<Card>> attacks = new HashMap<>();
-        attacks.put(participants.get(0), List.of(new Card("Adv", 'H', 10)));
-        attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
-        attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
-        return attacks;
-    }
-
-    private static List<List<Card>> getQuestSetup(int stages) {
-        List<List<Card>> questSetup = new ArrayList<>();
-        for (int i = 0; i < stages; i++) {
-            List<Card> stage = List.of(new Card("Adv", 'H', 10),
-                                       new Card("Adv", 'H', 10));
-            questSetup.add(stage);
-        }
-        return questSetup;
-    }
-
-    private static void initSponsorHand(Player sponsor) {
-        sponsor.getDeck().add(List.of(new Card("Adv", 'F', 5),
-                                      new Card("Adv", 'F', 5),
-                                      new Card("Adv", 'S', 10),
-                                      new Card("Adv", 'H', 10),
-                                      new Card("Adv", 'E', 30)));
     }
 }
