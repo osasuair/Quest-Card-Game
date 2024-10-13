@@ -1531,6 +1531,29 @@ class MainTest {
         assertFalse(continueQuest);
     }
 
+    @Test
+    @DisplayName("Game discards all cards from participants used in attacks")
+    public void RESP_31_test_01() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            Map<Player, List<Card>> setupAttacks(List<Player> participants) {
+                return getAttack2(participants);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        List<Card> stage = List.of(new Card("Adv", 'F', 70));
+
+        // Act
+        game.playStage(participants, stage);
+
+        // Assert
+        // (3) Participants attacks all have 1 card each, plus the trim for each player
+        assertEquals(3 + 3, game.adventureDeck.discardSize());
+    }
+
 
     private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
         Map<Player, List<Card>> attacks = new HashMap<>();
