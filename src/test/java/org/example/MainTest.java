@@ -1516,6 +1516,21 @@ class MainTest {
         assertTrue(participants.isEmpty());
     }
 
+    @Test
+    @DisplayName("Game ends a stage if all participants withdraw")
+    public void RESP_30_test_01() {
+        // Arrange
+        Scanner input = new Scanner("y\ny\ny\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+
+        // Act
+        boolean continueQuest = game.playStage(participants, new ArrayList<>());
+
+        // Assert
+        assertFalse(continueQuest);
+    }
+
 
     private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
         Map<Player, List<Card>> attacks = new HashMap<>();
