@@ -18,7 +18,7 @@ public class Game {
         questDeck = new Deck();
         players = new Player[playersAmount];
         for (int i = 0; i < playersAmount; ++i) {
-            players[i] = new Player(i+1);
+            players[i] = new Player(i + 1);
         }
     }
 
@@ -87,7 +87,7 @@ public class Game {
 
     void handlePlague(Player player) {
         print("Player " + player + " losses 2 shields");
-        player.shields  = (player.shields < 2) ? 0 : player.shields - 2;
+        player.shields = (player.shields < 2) ? 0 : player.shields - 2;
     }
 
     void handleQuestCard(Player player, Card card) {
@@ -158,11 +158,20 @@ public class Game {
     }
 
     List<Player> playQuest(Player sponsor, List<List<Card>> stages) {
-        return new ArrayList<>();
+        // Determine Eligible Players
+        List<Player> stagePlayers = new LinkedList<>(Arrays.asList(players));
+        stagePlayers.remove(sponsor);
+
+        for (List<Card> stage : stages) {
+            print("Stage: " + stage);
+            if (!playStage(stagePlayers, stage))
+                break;
+        }
+        return stagePlayers;
     }
 
 
-        boolean playStage(List<Player> stagePlayers, List<Card> stage) {
+    boolean playStage(List<Player> stagePlayers, List<Card> stage) {
         print("Eligible Players: " + stagePlayers);
         removeWithdrawnPlayers(stagePlayers);
         if (stagePlayers.isEmpty()) return false;
@@ -276,7 +285,7 @@ public class Game {
         int cardsToRemove = computeTrim(player);
         if (cardsToRemove == 0) return;
         print("Player " + player + " has more than 12 cards, select " + cardsToRemove + " cards to discard");
-        for(int i = 0; i < cardsToRemove; ++i) {
+        for (int i = 0; i < cardsToRemove; ++i) {
             adventureDeck.discard(player.playCard(selectCard(player)));
             print(player + "'s trimmed hand: " + player.getDeck());
         }
@@ -298,7 +307,7 @@ public class Game {
 
     void displayWinners(List<Player> winners) {
         String[] winnersNames = new String[winners.size()];
-        for(int i = 0; i < winners.size(); ++i) {
+        for (int i = 0; i < winners.size(); ++i) {
             winnersNames[i] = winners.get(i).toString();
         }
         print("Winners: " + String.join(", ", winnersNames));
