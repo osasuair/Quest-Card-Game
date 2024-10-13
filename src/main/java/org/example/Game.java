@@ -255,6 +255,9 @@ public class Game {
     }
 
     void cleanupQuest(Player sponsor, List<List<Card>> stageSetup) {
+        for (List<Card> stageDiscard : stageSetup) {
+            adventureDeck.discard(stageDiscard);
+        }
     }
 
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
