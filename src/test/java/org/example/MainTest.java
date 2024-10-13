@@ -1365,4 +1365,56 @@ class MainTest {
         assertEquals(expected, attack);
         assertTrue(output.toString().contains(game.players[0] + "'s attack: " + expected));
     }
+
+    @Test
+    @DisplayName("Game sets up the attack for each participant in stage")
+    public void RESP_27_test_01() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
+            List<Card> setupAttack(Player p) {  // Mock setup attack to return an easily verifiable attack
+                if (p.id == 1)
+                    return List.of(new Card("Adv", 'S', 10));
+                return p.getDeck().asList().subList(0, 2);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+
+        // Act
+        Map<Player, List<Card>> attacks = game.setupAttacks(participants);
+
+        // Assert
+        assertEquals(3, attacks.size());
+        for (Player p : participants) {
+            assertTrue(attacks.containsKey(p));
+            assertEquals(p.id == 1 ? 1 : 2, attacks.get(p).size());
+        }
+    }
+
+    @Test
+    @DisplayName("Game sets up attacks for participants in stage")
+    public void RESP_27_test_02() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
+            List<Card> setupAttack(Player p) {  // Mock setup attack to return an easily verifiable attack
+                return List.of(p.playCard(p.getCard(0)), p.playCard(p.getCard(1)));
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+
+        // Act
+        game.playStage(participants, new ArrayList<>());
+
+        // Assert
+        for (Player p : participants)
+            assertEquals(10, p.getDeck().size());
+        assertTrue(game.adventureDeck.discardSize() >= 2 * participants.size());
+    }
 }

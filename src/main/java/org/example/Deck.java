@@ -91,6 +91,10 @@ class Deck {
         return deck.size();
     }
 
+    int discardSize() {
+        return discard.size();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

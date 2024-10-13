@@ -1,9 +1,7 @@
 package org.example;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Game {
     final Player[] players;
@@ -161,7 +159,12 @@ public class Game {
         return false;
     }
 
-    List<Card> setupAttack(Player player) {
+    Map<Player, List<Card>> setupAttacks(List<Player> stagePlayers) {
+        return new HashMap<>();
+    }
+
+
+        List<Card> setupAttack(Player player) {
         List<Card> attack = new ArrayList<>();
         print("Player " + player + " setup attack");
         while (true) {
