@@ -109,6 +109,7 @@ public class Game {
         } else {
             print("No winners for the quest");
         }
+        cleanupQuest(sponsor, stages);
     }
 
     List<List<Card>> setupQuest(Player sponsor, Card card) {
