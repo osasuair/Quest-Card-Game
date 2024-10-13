@@ -1323,4 +1323,46 @@ class MainTest {
         assertEquals(hand.getFirst(), selected.getFirst());
         assertEquals(hand.get(2).value, selected.get(1).value);
     }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during attack setup - attack empty")
+    public void RESP_26_test_01() {
+        // Arrange
+        Scanner input = new Scanner("Quit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'D', 5),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10));
+        game.players[0].getDeck().add(hand);
+
+        // Act
+        List<Card> attack = game.setupAttack(game.players[0]);
+
+        // Assert
+        assertEquals(0, attack.size());
+        assertTrue(output.toString().contains(game.players[0] + "'s attack: []"));
+    }
+
+    @Test
+    @DisplayName("Game manages when 'Quit' is entered during attack setup - attack non-empty")
+    public void RESP_26_test_02() {
+        // Arrange
+        Scanner input = new Scanner("0\n1\nQuit\n");
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Card> hand = List.of(new Card("Adv", 'D', 5),
+                                  new Card("Adv", 'S', 10),
+                                  new Card("Adv", 'S', 10));
+        game.players[0].getDeck().add(hand);
+
+        // Act
+        List<Card> attack = game.setupAttack(game.players[0]);
+
+        // Assert
+        List<Card> expected = List.of(hand.get(0), hand.get(2));
+        assertEquals(2, attack.size());
+        assertEquals(expected, attack);
+        assertTrue(output.toString().contains(game.players[0] + "'s attack: " + expected));
+    }
 }
