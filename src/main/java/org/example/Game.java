@@ -149,6 +149,7 @@ public class Game {
     boolean playStage(List<Player> stagePlayers, List<Card> stage) {
         print("Eligible Players: " + stagePlayers);
         removeWithdrawnPlayers(stagePlayers);
+        if (stagePlayers.isEmpty()) return false;
 
         for (Player player : stagePlayers) {
             print(player + " draws 1 Adventure card");
