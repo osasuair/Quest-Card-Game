@@ -1734,15 +1734,7 @@ class MainTest {
     @DisplayName("Game discards all cards used by sponsor to build the quest")
     public void RESP_35_test_01() {
         // Arrange
-        Game game = new Game(PLAYERS_AMOUNT, input, output) {
-            List<List<Card>> setupQuest(Player sponsor, Card card) {
-                return new ArrayList<>();
-            }
-
-            List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
-                return List.of(players[1], players[3]);
-            }
-        };
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
         game.adventureDeck.initAdventureDeck();
         Player sponsor = game.players[0];
         int stages = 5;
@@ -1753,5 +1745,44 @@ class MainTest {
 
         // Assert
         assertEquals(stages, game.adventureDeck.discardSize());
+    }
+
+    @Test
+    @DisplayName("Game draws cards for sponsor after quest - no trim")
+    public void RESP_36_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        int stages = 4;
+        List<List<Card>> questSetup = getQuestSetup(stages);  // Creates stages with 1 card each
+
+        // Act
+        game.cleanupQuest(sponsor, questSetup);
+
+        // Assert
+        assertEquals(stages + stages, sponsor.hand.size()); // 1 card per stage + total num of stages
+    }
+
+    @Test
+    @DisplayName("Game draws cards for sponsor after quest - with trim")
+    public void RESP_36_test_02() {
+        // Arrange
+        Scanner input = new Scanner("0\n0\n0\n0\n");  // Trim cards
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        sponsor.pickCards(List.of(new Card("Adv", 'S', 10)));
+        List<List<Card>> questSetup = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            questSetup.add(List.of(new Card("Adv", 'S', 10), new Card("Adv", 'S', 10)));
+        }
+
+        // Act
+        game.cleanupQuest(sponsor, questSetup);
+
+        // Assert
+        assertEquals(12, sponsor.hand.size());
+        assertFalse(input.hasNextLine());  // Verify that the player was prompted to trim
     }
 }
