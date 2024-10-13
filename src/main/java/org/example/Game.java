@@ -158,6 +158,7 @@ public class Game {
         }
 
         Map<Player, List<Card>> attacks = setupAttacks(stagePlayers);
+        adventureDeck.discard(attacks.values().stream().flatMap(List::stream).toList());  // Discard all attack cards
         return resolveAttacks(stagePlayers, attacks, stage.stream().mapToInt(card -> card.value).sum());
     }
 
