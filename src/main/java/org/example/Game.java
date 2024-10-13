@@ -156,15 +156,21 @@ public class Game {
             trimHand(player);
         }
 
+        Map<Player, List<Card>> attacks = setupAttacks(stagePlayers);
         return false;
     }
 
     Map<Player, List<Card>> setupAttacks(List<Player> stagePlayers) {
-        return new HashMap<>();
+        Map<Player, List<Card>> attacks = new HashMap<>();
+        for (Player player : stagePlayers) {
+            List<Card> attack = setupAttack(player);
+            attacks.put(player, attack);
+        }
+        return attacks;
     }
 
 
-        List<Card> setupAttack(Player player) {
+    List<Card> setupAttack(Player player) {
         List<Card> attack = new ArrayList<>();
         print("Player " + player + " setup attack");
         while (true) {

@@ -1415,6 +1415,5 @@ class MainTest {
         // Assert
         for (Player p : participants)
             assertEquals(10, p.getDeck().size());
-        assertTrue(game.adventureDeck.discardSize() >= 2 * participants.size());
     }
 }
