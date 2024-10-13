@@ -55,9 +55,7 @@ public class Game {
             handleEventCard(player, card);
         }
 
-        print(player + "'s turn is over, press Enter to continue");
-        input.nextLine();
-        clearHotseat();
+        clearHotseat(player + "'s turn is over, press Enter to continue");
     }
 
     void handleEventCard(Player player, Card card) {
@@ -175,8 +173,9 @@ public class Game {
         List<Player> stagePlayers = new LinkedList<>(Arrays.asList(players));
         stagePlayers.remove(sponsor);
 
+        int stageIndex = 1;
         for (List<Card> stage : stages) {
-            print("Stage: " + stage);
+            print("Stage: " + stageIndex++);
             if (!playStage(stagePlayers, stage))
                 break;
         }
@@ -336,8 +335,10 @@ public class Game {
         print("Winners: " + String.join(", ", winnersNames));
     }
 
-    void clearHotseat() {
-        for (int i = 0; i < 10; ++i) {
+    void clearHotseat(String message) {
+        print(message);
+        input.nextLine();
+        for (int i = 0; i < 20; ++i) {
             output.println();
         }
         output.flush();

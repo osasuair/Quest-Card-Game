@@ -531,12 +531,8 @@ class MainTest {
     public void RESP_11_test_01() {
         // Arrange
         StringWriter output = new StringWriter();
-        Scanner input = new Scanner("\n"); // Simulate user input for sponsor questions
-        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
-            public void clearHotseat() { // Override clearHotseat to print a message that can be verified
-                print("Test Clear Hotseat");
-            }
-        };
+        Scanner input = new Scanner("\n"); // Simulate user pressing 'Enter'
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         game.questDeck.add(List.of(new Card("Plague")));
 
         // Act
@@ -544,8 +540,8 @@ class MainTest {
 
         // Assert
         assertTrue(output.toString().contains("P1's turn is over, press Enter to continue"));
+        assertTrue(output.toString().split("\n").length > 20);
         assertFalse(input.hasNextLine());  // Verify that 'Enter' key press is required to continue
-        assertTrue(output.toString().contains("Test Clear Hotseat"));
     }
 
     @Test
