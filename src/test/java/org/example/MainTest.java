@@ -1654,6 +1654,60 @@ class MainTest {
         assertEquals(1, output.toString().split("playStage/(/)").length);
     }
 
+    @Test
+    @DisplayName("Game gives shields to winners of a quest")
+    public void RESP_34_test_01() {
+        // Arrange
+        Scanner input = new Scanner("y\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            List<List<Card>> setupQuest(Player sponsor, Card card) {
+                return new ArrayList<>();
+            }
+            List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
+                return List.of(players[1], players[3]);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        initSponsorHand(sponsor);
+        Card questCard = new Card("Quest", 'Q', 3);
+
+        // Act
+        game.handleQuestCard(sponsor, questCard);
+
+        // Assert
+        assertEquals(3, game.players[1].shields);
+        assertEquals(3, game.players[3].shields);
+        assertEquals(0, game.players[0].shields);
+        assertEquals(0, game.players[2].shields);
+    }
+
+    @Test
+    @DisplayName("Game gives shields to winners of a quest - no winners")
+    public void RESP_34_test_02() {
+        // Arrange
+        Scanner input = new Scanner("y\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            List<List<Card>> setupQuest(Player sponsor, Card card) {
+                return new ArrayList<>();
+            }
+            List<Player> playQuest(Player sponsor, List<List<Card>> questSetup) {
+                return new ArrayList<>();
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+        initSponsorHand(sponsor);
+        Card questCard = new Card("Quest", 'Q', 3);
+
+        // Act
+        game.handleQuestCard(sponsor, questCard);
+
+        // Assert
+        for (Player p : game.players)
+            assertEquals(0, p.shields);
+    }
+
     private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
         Map<Player, List<Card>> attacks = new HashMap<>();
         attacks.put(participants.get(0), List.of(new Card("Adv", 'E', 30))); // attack > stage
