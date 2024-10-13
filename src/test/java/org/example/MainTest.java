@@ -1163,7 +1163,7 @@ class MainTest {
     @DisplayName("Game draws 1 adventure card for each participant in stage - trim required")
     public void RESP_22_test_02() {
         // Arrange
-        Scanner input = new Scanner("n\ny\ny\n0\n");  // only P1 tackles the stage and trims first card
+        Scanner input = new Scanner("n\n0\ny\ny\n");  // only P1 tackles the stage and trims first card
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
         List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
@@ -1415,7 +1415,7 @@ class MainTest {
     @DisplayName("Game sets up attacks for participants in stage")
     public void RESP_27_test_02() {
         // Arrange
-        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Scanner input = new Scanner("n\n0\nn\n0\nn\n0\n");
         StringWriter output = new StringWriter();
         Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
             List<Card> setupAttack(Player p) {  // Mock setup attack to return an easily verifiable attack
@@ -1490,7 +1490,7 @@ class MainTest {
     @DisplayName("Game resolves attacks for participants in stage - all survive")
     public void RESP_29_test_03() {
         // Arrange
-        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Scanner input = new Scanner("n\n0\nn\n0\nn\n0\n");
         Game game = new Game(PLAYERS_AMOUNT, input, output) {
             Map<Player, List<Card>> setupAttacks(List<Player> participants) {
                 return getAttack1(participants);
@@ -1513,7 +1513,7 @@ class MainTest {
     @DisplayName("Game resolves attacks for participants in stage - no survivors")
     public void RESP_29_test_04() {
         // Arrange
-        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Scanner input = new Scanner("n\n0\nn\n0\nn\n0\n");
         Game game = new Game(PLAYERS_AMOUNT, input, output) {
             Map<Player, List<Card>> setupAttacks(List<Player> participants) {
                 return getAttack2(participants);
@@ -1551,7 +1551,7 @@ class MainTest {
     @DisplayName("Game discards all cards from participants used in attacks")
     public void RESP_31_test_01() {
         // Arrange
-        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Scanner input = new Scanner("n\n0\nn\n0\nn\n0\n");
         Game game = new Game(PLAYERS_AMOUNT, input, output) {
             Map<Player, List<Card>> setupAttacks(List<Player> participants) {
                 return getAttack2(participants);

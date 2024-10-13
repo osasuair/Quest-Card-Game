@@ -185,14 +185,8 @@ public class Game {
 
     boolean playStage(List<Player> stagePlayers, List<Card> stage) {
         print("Eligible Players: " + stagePlayers);
-        removeWithdrawnPlayers(stagePlayers);
+        withdrawPlayers(stagePlayers);
         if (stagePlayers.isEmpty()) return false;
-
-        for (Player player : stagePlayers) {
-            print(player + " draws 1 Adventure card");
-            player.pickCards(adventureDeck.draw(1));
-            trimHand(player);
-        }
 
         Map<Player, List<Card>> attacks = setupAttacks(stagePlayers);
         adventureDeck.discard(attacks.values().stream().flatMap(List::stream).toList());  // Discard all attack cards
@@ -277,14 +271,18 @@ public class Game {
         return currentStageValue > previousStageValue;
     }
 
-    void removeWithdrawnPlayers(List<Player> stagePlayers) {
+    void withdrawPlayers(List<Player> stagePlayers) {
         List<Player> playersToRemove = new ArrayList<>();
         for (Player player : stagePlayers) {
             print(player + ": Do you want to withdraw from the quest? (y/n)");
             String answer = input.nextLine();
             if (answer.equals("y")) {
                 playersToRemove.add(player);
+                continue;
             }
+            print(player + " draws 1 Adventure card");
+            player.pickCards(adventureDeck.draw(1));
+            trimHand(player);
         }
         stagePlayers.removeAll(playersToRemove);
     }
