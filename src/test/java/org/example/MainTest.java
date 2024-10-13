@@ -1416,4 +1416,23 @@ class MainTest {
         for (Player p : participants)
             assertEquals(10, p.getDeck().size());
     }
+
+    @Test
+    @DisplayName("Game resolves an attack against a stage")
+    public void RESP_28_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output);
+        List<Card> attack = List.of(new Card("Adv", 'S', 10),
+                                    new Card("Adv", 'H', 10));
+
+        // Act
+        boolean successEquals = game.resolveAttack(attack, 20);
+        boolean successGreater = game.resolveAttack(attack, 15);
+        boolean failureLess = game.resolveAttack(attack, 25);
+
+        // Assert
+        assertTrue(successEquals);
+        assertTrue(successGreater);
+        assertFalse(failureLess);
+    }
 }

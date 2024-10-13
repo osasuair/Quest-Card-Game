@@ -196,6 +196,10 @@ public class Game {
         return attack;
     }
 
+    boolean resolveAttack(List<Card> attack, int stageValue) {
+        return false;
+    }
+
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
         return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
     }
