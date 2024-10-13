@@ -168,7 +168,10 @@ public class Game {
             print(player + "'s Deck: " + player.getDeck());
             print("Select a card for the attack or enter 'Quit' to finish attack setup");
             String cardIndex = input.nextLine();
-            if (!input.hasNextLine()) break;
+            if (cardIndex.equalsIgnoreCase("Quit")) {
+                print(player + "'s attack: " + attack);
+                break;
+            }
 
             Card card = player.getCard(Integer.parseInt(cardIndex));
             if (card == null) {
