@@ -1608,6 +1608,51 @@ class MainTest {
         assertEquals(0, sponsor.getDeck().size());
     }
 
+    @Test
+    @DisplayName("Game determines winners of a quest - winners")
+    public void RESP_33_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            boolean playStage(List<Player> participants, List<Card> stage) {
+                participants.removeIf(p -> p.id == 3);  // P3 ailed the stage
+                return true;
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+
+        // Act
+        List<Player> winners = game.playQuest(sponsor, getQuestSetup(2));
+
+        // Assert
+        assertEquals(2, winners.size());
+        List<Player> expected = List.of(game.players[1], game.players[3]);
+        assertEquals(expected, winners);
+    }
+
+    @Test
+    @DisplayName("Game determines winners of a quest - no winners")
+    public void RESP_33_test_02() {
+        // Arrange
+        StringWriter output = new StringWriter();
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output)) {
+            boolean playStage(List<Player> participants, List<Card> stage) {
+                print("playStage()");
+                participants.clear();
+                return false;
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        Player sponsor = game.players[0];
+
+        // Act
+        List<Player> winners = game.playQuest(sponsor, getQuestSetup(4));
+
+        // Assert
+        assertTrue(winners.isEmpty());
+        assertTrue(output.toString().contains("playStage()"));
+        assertEquals(1, output.toString().split("playStage/(/)").length);
+    }
 
     private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
         Map<Player, List<Card>> attacks = new HashMap<>();
@@ -1623,6 +1668,15 @@ class MainTest {
         attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
         attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
         return attacks;
+    }
+
+    private static List<List<Card>> getQuestSetup(int stages) {
+        List<List<Card>> questSetup = new ArrayList<>();
+        for (int i = 0; i < stages; i++) {
+            List<Card> stage = new ArrayList<>();
+            questSetup.add(stage);
+        }
+        return questSetup;
     }
 
     private static void initSponsorHand(Player sponsor) {

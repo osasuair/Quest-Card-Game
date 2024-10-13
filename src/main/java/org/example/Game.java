@@ -157,7 +157,12 @@ public class Game {
         return input.nextLine().equals("y");
     }
 
-    boolean playStage(List<Player> stagePlayers, List<Card> stage) {
+    List<Player> playQuest(Player sponsor, List<List<Card>> stages) {
+        return new ArrayList<>();
+    }
+
+
+        boolean playStage(List<Player> stagePlayers, List<Card> stage) {
         print("Eligible Players: " + stagePlayers);
         removeWithdrawnPlayers(stagePlayers);
         if (stagePlayers.isEmpty()) return false;
