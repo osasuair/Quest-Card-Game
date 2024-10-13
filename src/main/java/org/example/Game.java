@@ -196,6 +196,10 @@ public class Game {
         return attack;
     }
 
+    boolean resolveAttacks(List<Player> participants, Map<Player, List<Card>> attacks, int stageValue) {
+        return false;
+    }
+
     boolean resolveAttack(List<Card> attack, int stageValue) {
         int attackPower = attack.stream().mapToInt(card -> card.value).sum();
         return attackPower >= stageValue;

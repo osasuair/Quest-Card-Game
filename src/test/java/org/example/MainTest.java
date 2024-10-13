@@ -1435,4 +1435,101 @@ class MainTest {
         assertTrue(successGreater);
         assertFalse(failureLess);
     }
+
+    @Test
+    @DisplayName("Game resolves the attack for each participant - 1 survivor")
+    public void RESP_29_test_01() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        Map<Player, List<Card>> attacks = getAttack1(participants);
+        int stageValue = 20;
+
+        // Act
+        boolean continueQuest = game.resolveAttacks(participants, attacks, stageValue);
+
+        // Assert
+        assertTrue(continueQuest);
+        assertEquals(List.of(game.players[0]), participants);
+    }
+
+    @Test
+    @DisplayName("Game resolves the attack for each participants - no survivors")
+    public void RESP_29_test_02() {
+        // Arrange
+        Game game = new Game(PLAYERS_AMOUNT, input, new PrintWriter(output));
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        Map<Player, List<Card>> attacks = getAttack2(participants);
+        int stageValue = 20;
+
+        // Act
+        boolean continueQuest = game.resolveAttacks(participants, attacks, stageValue);
+
+        // Assert
+        assertFalse(continueQuest);
+        assertTrue(participants.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Game resolves attacks for participants in stage - all survive")
+    public void RESP_29_test_03() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            Map<Player, List<Card>> setupAttacks(List<Player> participants) {
+                return getAttack1(participants);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        List<Card> stage = List.of(new Card("Adv", 'H', 10));
+
+        // Act
+        boolean continueQuest = game.playStage(participants, stage);
+
+        // Assert
+        assertTrue(continueQuest);
+        assertEquals(new ArrayList<>(Arrays.asList(game.players)).subList(0, 3), participants);
+    }
+
+    @Test
+    @DisplayName("Game resolves attacks for participants in stage - no survivors")
+    public void RESP_29_test_04() {
+        // Arrange
+        Scanner input = new Scanner("n\nn\nn\n0\n0\n0\n");
+        Game game = new Game(PLAYERS_AMOUNT, input, output) {
+            Map<Player, List<Card>> setupAttacks(List<Player> participants) {
+                return getAttack2(participants);
+            }
+        };
+        game.adventureDeck.initAdventureDeck();
+        game.initPlayers();
+        List<Player> participants = new ArrayList<>(Arrays.asList(game.players).subList(0, 3));
+        List<Card> stage = List.of(new Card("Adv", 'F', 70));
+
+        // Act
+        boolean continueQuest = game.playStage(participants, stage);
+
+        // Assert
+        assertFalse(continueQuest);
+        assertTrue(participants.isEmpty());
+    }
+
+
+    private static Map<Player, List<Card>> getAttack1(List<Player> participants) {
+        Map<Player, List<Card>> attacks = new HashMap<>();
+        attacks.put(participants.get(0), List.of(new Card("Adv", 'E', 30))); // attack > stage
+        attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
+        attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
+        return attacks;
+    }
+
+    private static Map<Player, List<Card>> getAttack2(List<Player> participants) {
+        Map<Player, List<Card>> attacks = new HashMap<>();
+        attacks.put(participants.get(0), List.of(new Card("Adv", 'H', 10)));
+        attacks.put(participants.get(1), List.of(new Card("Adv", 'H', 10)));
+        attacks.put(participants.get(2), List.of(new Card("Adv", 'H', 10)));
+        return attacks;
+    }
 }
