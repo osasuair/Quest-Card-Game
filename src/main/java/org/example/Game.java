@@ -96,24 +96,17 @@ public class Game {
             print("No sponsor found for the Quest");
             return;
         }
+        List<List<Card>> stages = setupQuest(sponsor, card);
     }
 
     List<List<Card>> setupQuest(Player sponsor, Card card) {
-        return new ArrayList<>();
-    }
-
-    Player findSponsor(int currentPlayer, Card card) {
-        Player sponsor = null;
-        for (int i = 0; i < players.length && sponsor == null; ++i) {
-            Player p = players[(currentPlayer + i) % players.length];
-            sponsor = promptSponsor(p, card) ? p : null;
+        List<List<Card>> stages = new ArrayList<>();
+        for (int i = 1; i <= card.value; ++i) {
+            List<Card> previousStage = i > 1 ? stages.get(i - 2) : new ArrayList<>();
+            int previousStageValue = previousStage.stream().mapToInt(card1 -> card1.value).sum();
+            stages.add(setupStage(sponsor, i, previousStageValue));
         }
-        return sponsor;
-    }
-
-    boolean promptSponsor(Player p, Card c) {
-        print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
-        return input.nextLine().equals("y");
+        return stages;
     }
 
     List<Card> setupStage(Player sponsor, int currStage, int previousStageValue) {
@@ -148,6 +141,20 @@ public class Game {
             }
         }
         return stage;
+    }
+
+    Player findSponsor(int currentPlayer, Card card) {
+        Player sponsor = null;
+        for (int i = 0; i < players.length && sponsor == null; ++i) {
+            Player p = players[(currentPlayer + i) % players.length];
+            sponsor = promptSponsor(p, card) ? p : null;
+        }
+        return sponsor;
+    }
+
+    boolean promptSponsor(Player p, Card c) {
+        print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
+        return input.nextLine().equals("y");
     }
 
     boolean playStage(List<Player> stagePlayers, List<Card> stage) {
