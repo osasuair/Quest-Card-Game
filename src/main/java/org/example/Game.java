@@ -258,6 +258,10 @@ public class Game {
         for (List<Card> stageDiscard : stageSetup) {
             adventureDeck.discard(stageDiscard);
         }
+        int cardsToPickup = stageSetup.stream().mapToInt(List::size).sum() + stageSetup.size();
+        sponsor.pickCards(adventureDeck.draw(cardsToPickup));
+        trimHand(sponsor);
+        print("Sponsor " + sponsor + " deck: " + sponsor.getDeck());
     }
 
     private boolean multipleFoes(Card cardSelected, List<Card> cards) {
