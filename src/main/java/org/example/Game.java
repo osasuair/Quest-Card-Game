@@ -77,6 +77,7 @@ public class Game {
             print("Player " + p + " draws 2 Adventure cards");
             p.pickCards(adventureDeck.draw(2));
             trimHand(p);
+            clearScreen();
         }
     }
 
@@ -98,7 +99,9 @@ public class Game {
             return;
         }
         List<List<Card>> stages = setupQuest(sponsor, card);
+        clearScreen();
         List<Player> winners = playQuest(sponsor, stages);
+        clearScreen();
 
         if (!winners.isEmpty()) {
             print("Players " + winners + " win the quest and gain " + card.value + " shields");
@@ -201,6 +204,7 @@ public class Game {
         for (Player player : stagePlayers) {
             List<Card> attack = setupAttack(player);
             attacks.put(player, attack);
+            clearScreen();
         }
         return attacks;
     }
@@ -283,9 +287,11 @@ public class Game {
                 playersToRemove.add(player);
                 continue;
             }
-            print(player + " draws 1 Adventure card");
-            player.pickCards(adventureDeck.draw(1));
+            List<Card> drawn = adventureDeck.draw(1);
+            print(player + " draws 1 Adventure card ("+ drawn.getFirst() + ")");
+            player.pickCards(drawn);
             trimHand(player);
+            clearScreen();
         }
         stagePlayers.removeAll(playersToRemove);
     }
@@ -339,6 +345,10 @@ public class Game {
     void clearHotseat(String message) {
         print(message);
         input.nextLine();
+        clearScreen();
+    }
+
+    void clearScreen() {
         for (int i = 0; i < 20; ++i) {
             output.println();
         }
