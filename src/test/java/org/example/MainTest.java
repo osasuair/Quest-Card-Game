@@ -1828,4 +1828,54 @@ class MainTest {
         // Assert
         assertTrue(output.toString().contains("handleQuestCard(" + questCard + ")"));
     }
+
+    @Test
+    @DisplayName("A-Test JP-Scenario")
+    public void A_test_JP() {
+        // Arrange
+        String inputStr = "n\n" + // P1 declines Q4 quest
+                          "y\n" + // P2 accepts Q4 quest
+                          "0\n7\nQuit\n" + // P2 builds stage 1
+                          "1\n4\nQuit\n" + // P2 builds stage 2
+                          "1\n2\n3\nQuit\n" + // P2 builds stage 3
+                          "1\n2\nQuit\n" + // P2 builds stage 4
+                          "n\n0\n" + // P1 is asked to participate and trims F5
+                          "n\n0\n" + // P3 is asked to participate and trims F5
+                          "n\n0\n" + // P4 is asked to participate and trims F5
+                          "4\n4\nQuit\n" + // P1 builds attack
+                          "4\n3\nQuit\n" + // P3 builds attack
+                          "3\n5\nQuit\n" + // P4 builds attack
+                          "n\n" + // P1 is asked to participate
+                          "n\n" + // P3 is asked to participate
+                          "n\n" + // P4 is asked to participate
+                          "6\n5\nQuit\n" + // P1 builds attack
+                          "8\n3\nQuit\n" + // P3 builds attack
+                          "5\n5\nQuit\n" + // P4 builds attack
+                          "n\n" + // P3 is asked to participate
+                          "n\n" + // P4 is asked to participate
+                          "8\n5\n3\nQuit\n" + // P3 builds attack
+                          "6\n4\n5\nQuit\n" + // P4 builds attack
+                          "n\n" + // P3 is asked to participate
+                          "n\n" + // P4 is asked to participate
+                          "6\n5\n5\nQuit\n" + // P3 builds attack
+                          "3\n3\n3\n4\nQuit\n" + // P4 builds attack
+                          "0\n0\n0\n0\n"; // P2 trims hand
+
+
+        Scanner input = new Scanner(inputStr);
+        Game game = ATestHelper.rigGameSetupATest1(input, output);
+
+        // Act
+        assertThrows(NoSuchElementException.class, game::start); // Game would normally continue as no player has 7 shields
+
+        // Assert
+        assertEquals(0, game.players[0].shields);
+        assertEquals("[F5, F10, F15, F15, F30, H10, B15, B15, L20]", game.players[0].getDeck().toString());
+        assertEquals(0, game.players[2].shields);
+        assertEquals("[F5, F5, F15, F30, S10]", game.players[2].getDeck().toString());
+        assertEquals(4, game.players[3].shields);
+        assertEquals("[F15, F15, F40, L20]", game.players[3].getDeck().toString());
+        assertEquals(12, game.players[1].hand.size());
+    }
+
 }
