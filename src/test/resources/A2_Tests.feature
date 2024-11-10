@@ -143,7 +143,7 @@ Feature: Quest Game
     When P1 hosts a 4 stage quest
     Then Players '[P2, P3, P4]' should 'earn' 4 shields
     And P2 draws a 'Plague' event card
-      | player | discard  |
+      | player | discard |
     And Players '[P2]' should 'lose' 2 shields
     And P3 draws a 'Prosperity' event card
       | player | discard  |
@@ -157,3 +157,29 @@ Feature: Quest Game
     And P1 hosts a 3 stage quest
     And Players '[P2, P3]' should 'earn' 3 shields
     And Players '[P3]' should be declared the winner
+
+  Scenario: 0_winner_quest
+    Given a rigged 0winner game of Quest starts
+    When P1 draws a 2 stage quest
+    Then P1 sponsors the quest
+    And P1 builds the 2 stages
+      | stage | cards      |
+      | 1     | [F5, H10]  |
+      | 2     | [F10, H10] |
+    And Players '[P2, P3, P4]' participate in stage
+      | player | discard  |
+      | P2     | first[1] |
+      | P3     | first[1] |
+      | P4     | first[1] |
+    And Players build their stage 1 attack
+      | player | attack |
+      | P2     | []     |
+      | P3     | []     |
+      | P4     | []     |
+    And Players attack the stage 1
+    And P1's quest is cleaned up
+      | player | discard  |
+      | P1     | first[2] |
+    And Players '[]' should be declared the winner
+    And Players '[P2, P3, P4]' should 'earn' 0 shields
+    And P1 should discard and draw 6 cards

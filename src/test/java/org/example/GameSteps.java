@@ -618,6 +618,21 @@ public class GameSteps {
     }
 
     /**
+     * Sets up a game of Quest with specific cards and a 2-stage quest.
+     */
+    @Given("a rigged 0winner game of Quest starts")
+    public void aRigged0WinnerGameOfQuestStarts() {
+        game = new Game(NUM_PLAYERS, input, output);
+        game.setupGame();
+        game.adventureDeck.initAdventureDeck();
+
+        game.players[0].getDeck().asList().clear();
+        game.players[0].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, F10, F15, F10, F15, F15, D5, D5, D5, H10, H10, B15]"));
+
+        updateHistory();
+    }
+
+    /**
      * Inner class to store details about the current quest.
      */
     public static class QuestDetails {
