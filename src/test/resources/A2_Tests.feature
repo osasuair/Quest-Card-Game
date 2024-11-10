@@ -48,7 +48,7 @@ Feature: Quest Game
       | P3     | [B15, H10, L20]     |
       | P4     | [D5, S10, L20, E30] |
     And Players attack the stage 4
-    And Players '[P3]' should 'earn' 0 shields
+    And Players '[P1, P2, P3]' should 'earn' 0 shields
     And Player 'P3' should match cards '[F5, F5, F15, F30, S10]'
     And Players '[P4]' should 'earn' 4 shields
     And Player 'P4' should match cards '[F15, F15, F40, L20]'
