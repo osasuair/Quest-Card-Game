@@ -3,10 +3,10 @@ package org.example;
 import java.util.Collections;
 import java.util.List;
 
-class Player {
+public class Player {
     int id;
-    Deck hand;
     int shields;
+    private final Deck hand;
 
     public Player(int id) {
         this.id = id;

@@ -1757,7 +1757,7 @@ class MainTest {
         game.cleanupQuest(sponsor, questSetup);
 
         // Assert
-        assertEquals(stages + stages, sponsor.hand.size()); // 1 card per stage + total num of stages
+        assertEquals(stages + stages, sponsor.getDeck().size()); // 1 card per stage + total num of stages
     }
 
     @Test
@@ -1778,7 +1778,7 @@ class MainTest {
         game.cleanupQuest(sponsor, questSetup);
 
         // Assert
-        assertEquals(12, sponsor.hand.size());
+        assertEquals(12, sponsor.getDeck().size());
         assertFalse(input.hasNextLine());  // Verify that the player was prompted to trim
     }
 
@@ -1805,7 +1805,7 @@ class MainTest {
         game.handleQuestCard(sponsor, questCard);
 
         // Assert
-        assertEquals(5 + 2 + 2, sponsor.hand.size()); // 5 (Sponsor's hand) + 2 (1 card per stage) + 2 (num of stages)
+        assertEquals(5 + 2 + 2, sponsor.getDeck().size()); // 5 (Sponsor's hand) + 2 (1 card per stage) + 2 (num of stages)
         assertEquals(2, game.adventureDeck.discardSize());  // 2 cards used to build the quest
     }
 
@@ -1875,7 +1875,7 @@ class MainTest {
         assertEquals("[F5, F5, F15, F30, S10]", game.players[2].getDeck().toString());
         assertEquals(4, game.players[3].shields);
         assertEquals("[F15, F15, F40, L20]", game.players[3].getDeck().toString());
-        assertEquals(12, game.players[1].hand.size());
+        assertEquals(12, game.players[1].getDeck().size());
     }
 
 }

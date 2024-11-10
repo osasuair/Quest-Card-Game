@@ -1,6 +1,6 @@
 package org.example;
 
-class Card implements Comparable<Card> {
+public class Card implements Comparable<Card> {
     final char type;
     final String cardType;
     final int value;

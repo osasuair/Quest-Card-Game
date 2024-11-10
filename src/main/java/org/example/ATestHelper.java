@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import static org.example.Main.PLAYERS_AMOUNT;
 
-class ATestHelper {
+public class ATestHelper {
     static final List<Card> p1Hand = List.of(new Card("Adv", 'F', 5),
                                              new Card("Adv", 'F', 5),
                                              new Card("Adv", 'F', 15),

@@ -102,7 +102,11 @@ public class Game {
         clearScreen();
         List<Player> winners = playQuest(sponsor, stages);
         clearScreen();
+        declareWinners(card, winners);
+        cleanupQuest(sponsor, stages);
+    }
 
+    private void declareWinners(Card card, List<Player> winners) {
         if (!winners.isEmpty()) {
             print("Players " + winners + " win the quest and gain " + card.value + " shields");
             // Update winners
@@ -113,14 +117,13 @@ public class Game {
         } else {
             print("No winners for the quest");
         }
-        cleanupQuest(sponsor, stages);
     }
 
     List<List<Card>> setupQuest(Player sponsor, Card card) {
         List<List<Card>> stages = new ArrayList<>();
         for (int i = 1; i <= card.value; ++i) {
             List<Card> previousStage = i > 1 ? stages.get(i - 2) : new ArrayList<>();
-            int previousStageValue = previousStage.stream().mapToInt(card1 -> card1.value).sum();
+            int previousStageValue = getStageValue(previousStage);
             stages.add(setupStage(sponsor, i, previousStageValue));
         }
         return stages;
@@ -196,7 +199,11 @@ public class Game {
 
         Map<Player, List<Card>> attacks = setupAttacks(stagePlayers);
         adventureDeck.discard(attacks.values().stream().flatMap(List::stream).toList());  // Discard all attack cards
-        return resolveAttacks(stagePlayers, attacks, stage.stream().mapToInt(card -> card.value).sum());
+        return resolveAttacks(stagePlayers, attacks, getStageValue(stage));
+    }
+
+    public static int getStageValue(List<Card> stage) {
+        return stage.stream().mapToInt(card -> card.value).sum();
     }
 
     Map<Player, List<Card>> setupAttacks(List<Player> stagePlayers) {
@@ -251,7 +258,7 @@ public class Game {
     }
 
     boolean resolveAttack(List<Card> attack, int stageValue) {
-        int attackPower = attack.stream().mapToInt(card -> card.value).sum();
+        int attackPower = getStageValue(attack);
         return attackPower >= stageValue;
     }
 
@@ -274,7 +281,7 @@ public class Game {
     }
 
     private boolean largerThanLastStage(List<Card> currStage, int previousStageValue) {
-        int currentStageValue = currStage.stream().mapToInt(card -> card.value).sum();
+        int currentStageValue = getStageValue(currStage);
         return currentStageValue > previousStageValue;
     }
 
@@ -322,7 +329,7 @@ public class Game {
     }
 
     int computeTrim(Player player) {
-        return player.hand.size() > 12 ? player.hand.size() - 12 : 0;
+        return player.getDeck().size() > 12 ? player.getDeck().size() - 12 : 0;
     }
 
     List<Player> checkWinners() {
