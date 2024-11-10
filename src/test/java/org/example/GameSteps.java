@@ -343,11 +343,10 @@ public class GameSteps {
         int shieldChange = action.equals("earn") ? numShields : -numShields;
         List<String> players = parseStringList(playersStr);
         for (int i = 0; i < 4; i++) {
-            if (players.contains("P" + i + 1)) {
+            if (players.contains("P" + (i + 1))) {
                 assertEquals(previousShields[i] + shieldChange, game.players[i].shields);
             }
         }
-        updateHistory();
     }
 
     /**
@@ -462,6 +461,7 @@ public class GameSteps {
         Map<String, String> discardMap = getDiscardInputMap(discardTable.asMaps(), List.of(game.players));
         game.input = new Scanner(discardMap.get("P" + player));
         game.cleanupQuest(questDetails.sponsor, questDetails.stages);
+        game.declareWinners(questDetails.card, questDetails.players);
     }
 
     /**
@@ -563,6 +563,7 @@ public class GameSteps {
      */
     @When("P{int} hosts a {int} stage quest")
     public void pHostsAStageQuest(int player, int stages) {
+        updateHistory();
         // game depends on currentPlayer to be set
         game.questDeck.asList().addFirst(new Card("Quest", 'Q', stages));
         game.input = new Scanner(getInputForQuest(stages) + "\n"); // input for ending turn
@@ -578,6 +579,7 @@ public class GameSteps {
      */
     @And("P{int} draws a {string} event card")
     public void pDrawsEventCard(int player, String event, DataTable discardTable) {
+        updateHistory();
         game.questDeck.asList().addFirst(new Card(event));
         game.input = new Scanner(getEventCardInput(event, player, discardTable.asMaps()) + "\n");
         game.playTurn(game.players[(game.currentPlayer = player - 1)]);
@@ -630,6 +632,15 @@ public class GameSteps {
         game.players[0].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, F10, F15, F10, F15, F15, D5, D5, D5, H10, H10, B15]"));
 
         updateHistory();
+    }
+
+    @And("Players {string} should have {int} shields")
+    public void playersPShouldHaveShields(String playersStr, int numShields) {
+        List<String> players = parseStringList(playersStr);
+        for (int i = 0; i < 4; i++) {
+            if (players.contains("P" + (i + 1)))
+                assertEquals(numShields, game.players[i].shields);
+        }
     }
 
     /**

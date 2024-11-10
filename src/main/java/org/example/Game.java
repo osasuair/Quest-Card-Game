@@ -106,7 +106,7 @@ public class Game {
         cleanupQuest(sponsor, stages);
     }
 
-    private void declareWinners(Card card, List<Player> winners) {
+    public void declareWinners(Card card, List<Player> winners) {
         if (!winners.isEmpty()) {
             print("Players " + winners + " win the quest and gain " + card.value + " shields");
             // Update winners
