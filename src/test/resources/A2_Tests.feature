@@ -57,3 +57,83 @@ Feature: Quest Game
       | P2     | first[4] |
     And Player P2 should have 12 cards
     And P2 should discard and draw 13 cards
+
+  Scenario: 2winner_game_2winner_quest
+    Given a rigged 2winner game of Quest starts
+    When P1 draws a 4 stage quest
+    Then P1 sponsors the quest
+    And P1 builds the 4 stages
+      | stage | cards |
+      | 1     | [F5]  |
+      | 2     | [F10] |
+      | 3     | [F15] |
+      | 4     | [F20] |
+    And Players '[P2, P3, P4]' participate in stage
+      | player | discard  |
+      | P2     | first[1] |
+      | P3     | first[1] |
+      | P4     | first[1] |
+    And Players build their stage 1 attack
+      | player | attack |
+      | P2     | [H10]  |
+      | P3     | []     |
+      | P4     | [H10]  |
+    And Players attack the stage 1
+    And Players '[P2, P4]' should pass stage 1
+    And Players '[P2, P4]' participate in stage
+      | player | discard |
+    And Players build their stage 2 attack
+      | player | attack |
+      | P2     | [B15]  |
+      | P4     | [B15]  |
+    And Players attack the stage 2
+    And Players '[P2, P4]' should pass stage 2
+    And Players '[P2, P4]' participate in stage
+      | player | discard |
+    And Players build their stage 3 attack
+      | player | attack |
+      | P2     | [B15]  |
+      | P4     | [B15]  |
+    And Players attack the stage 3
+    And Players '[P2, P4]' should pass stage 3
+    And Players '[P2, P4]' participate in stage
+      | player | discard |
+    And Players build their stage 4 attack
+      | player | attack |
+      | P2     | [L20]  |
+      | P4     | [L20]  |
+    And Players attack the stage 4
+    And Players '[P2, P4]' should 'earn' 4 shields
+    And P2 draws a 3 stage quest
+    And P3 sponsors the quest
+    And P3 builds the 3 stages
+      | stage | cards |
+      | 1     | [F5]  |
+      | 2     | [F10] |
+      | 3     | [F15] |
+    And Players '[P2, P4]' participate in stage
+      | player | discard  |
+      | P2     | first[1] |
+      | P4     | first[1] |
+    And Players build their stage 1 attack
+      | player | attack |
+      | P2     | [S10]  |
+      | P4     | [S10]  |
+    And Players attack the stage 1
+    And Players '[P2, P4]' should pass stage 1
+    And Players '[P2, P4]' participate in stage
+      | player | discard |
+    And Players build their stage 2 attack
+      | player | attack |
+      | P2     | [S10]  |
+      | P4     | [S10]  |
+    And Players attack the stage 2
+    And Players '[P2, P4]' should pass stage 2
+    And Players '[P2, P4]' participate in stage
+      | player | discard |
+    And Players build their stage 3 attack
+      | player | attack |
+      | P2     | [L20]  |
+      | P4     | [L20]  |
+    And Players attack the stage 3
+    And Players '[P2, P4]' should 'earn' 3 shields

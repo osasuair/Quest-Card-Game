@@ -184,6 +184,25 @@ public class GameSteps {
         return inputBuilder.toString();
     }
 
+    /**
+     * Helper function to pick cards from the adventure deck based on a string representation.
+     *
+     * @param adventureDeck The adventure deck to pick cards from.
+     * @param hand          A string representing the cards to pick (e.g., "F5, F5, F10").
+     * @return A list of cards picked from the deck.
+     */
+    private List<Card> pickCardsFromDeck(Deck adventureDeck, String hand) {
+        List<Card> result = new ArrayList<>();
+        for (String card : parseStringList(hand)) {
+            char type = card.charAt(0);
+            int value = Integer.parseInt(card.substring(1));
+            Card c = new Card("Adv", type, value);
+            int index = adventureDeck.asList().indexOf(c);
+            if (index != -1) result.add(adventureDeck.asList().remove(index));
+        }
+        return result;
+    }
+
     private static int getPlayerId(String player) {
         return Integer.parseInt(player.substring(1));
     }
@@ -378,6 +397,26 @@ public class GameSteps {
     @And("Player P{int} should have {int} cards")
     public void playerPShouldHaveNumCards(int player, int numCards) {
         assertEquals(numCards, game.players[player-1].getDeck().size());
+    }
+
+    /**
+     * Sets up a rigged game of Quest with 4 players where P1 and P2 are set up to win.
+     * This includes initializing the adventure and quest decks, and setting up the players' hands.
+     */
+    @Given("a rigged 2winner game of Quest starts")
+    public void aRigged2WinnerGameOfQuestStarts() {
+        game = new Game(NUM_PLAYERS, input, output);
+
+        // Set Adventure deck
+        game.adventureDeck.initAdventureDeck();
+
+        // Set players' hands
+        game.players[0].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, F5, F10, F10, F15, F15, F20, D5, D5, H10, H10, B15]"));
+        game.players[1].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, S10, S10, S10, S10, H10, H10, B15, B15, L20, L20, E30]"));
+        game.players[2].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, F10, F15, F40, D5, D5, S10, H10, H10, B15, L20, L20]"));
+        game.players[3].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, S10, S10, S10, S10, H10, H10, B15, B15, L20, L20, E30]"));
+
+        updateHistory();
     }
 
     /**
