@@ -137,3 +137,23 @@ Feature: Quest Game
       | P4     | [L20]  |
     And Players attack the stage 3
     And Players '[P2, P4]' should 'earn' 3 shields
+
+  Scenario: 1winner_game_with_events
+    Given a rigged 1winner game of Quest starts
+    When P1 hosts a 4 stage quest
+    Then Players '[P2, P3, P4]' should 'earn' 4 shields
+    And P2 draws a 'Plague' event card
+      | player | discard  |
+    And Players '[P2]' should 'lose' 2 shields
+    And P3 draws a 'Prosperity' event card
+      | player | discard  |
+      | P4     | first[1] |
+      | P1     | [D5, D5] |
+    And the number of cards in '[P1, P2, P3, P4]' hand increases by 2
+    And P4 draws a 'Queen\'s favor' event card
+      | player | discard  |
+      | P1     | first[2] |
+    And the number of cards in 'P4' hand increases by 2
+    And P1 hosts a 3 stage quest
+    And Players '[P2, P3]' should 'earn' 3 shields
+    And Players '[P3]' should be declared the winner
