@@ -1,4 +1,4 @@
-package org.example;
+package org.quest;
 
 import org.junit.runner.RunWith;
 import io.cucumber.junit.Cucumber;

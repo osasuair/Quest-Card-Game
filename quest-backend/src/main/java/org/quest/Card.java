@@ -1,4 +1,7 @@
-package org.example;
+package org.quest;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.springframework.lang.NonNull;
 
 public class Card implements Comparable<Card> {
     final char type;
@@ -19,6 +22,7 @@ public class Card implements Comparable<Card> {
         this.value = 0;
     }
 
+    @JsonValue
     @Override
     public String toString() {
         if (type == 'E' && value == 0) {
@@ -28,7 +32,7 @@ public class Card implements Comparable<Card> {
     }
 
     @Override
-    public int compareTo(Card card) {
+    public int compareTo(@NonNull Card card) {
         if (cardType.equals("Adv") && card.cardType.equals("Adv")) {
             if (type == 'F' && card.type != 'F')
                 return -1;

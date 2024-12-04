@@ -1,4 +1,4 @@
-package org.example;
+package org.quest;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,8 @@ import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.example.Main.PLAYERS_AMOUNT;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.quest.Main.PLAYERS_AMOUNT;
 
 class MainTest {
 
@@ -492,7 +492,7 @@ class MainTest {
         game.players[0].pickCards(orgHand);
 
         // Manipulate the quest deck to ensure the first card is a Queen's Favor card
-        Card eventCard = new Card("Queen’s favor"); // Example Event card
+        Card eventCard = new Card("Queen's favor"); // Example Event card
         game.questDeck.add(List.of(eventCard));
 
         // Act
@@ -1805,7 +1805,8 @@ class MainTest {
         game.handleQuestCard(sponsor, questCard);
 
         // Assert
-        assertEquals(5 + 2 + 2, sponsor.getDeck().size()); // 5 (Sponsor's hand) + 2 (1 card per stage) + 2 (num of stages)
+        assertEquals(5 + 2 + 2,
+                     sponsor.getDeck().size()); // 5 (Sponsor's hand) + 2 (1 card per stage) + 2 (num of stages)
         assertEquals(2, game.adventureDeck.discardSize());  // 2 cards used to build the quest
     }
 
@@ -1866,7 +1867,8 @@ class MainTest {
         Game game = ATestHelper.rigGameSetupATest1(input, output);
 
         // Act
-        assertThrows(NoSuchElementException.class, game::start); // Game would normally continue as no player has 7 shields
+        assertThrows(NoSuchElementException.class,
+                     game::start); // Game would normally continue as no player has 7 shields
 
         // Assert
         assertEquals(0, game.players[0].shields);

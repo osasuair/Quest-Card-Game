@@ -1,4 +1,4 @@
-package org.example;
+package org.quest;
 
 import java.io.PrintWriter;
 import java.util.Scanner;

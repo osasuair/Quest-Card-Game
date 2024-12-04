@@ -1,11 +1,11 @@
-package org.example;
+package org.quest;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.example.Main.PLAYERS_AMOUNT;
+import static org.quest.Main.PLAYERS_AMOUNT;
 
 public class ATestHelper {
     static final List<Card> p1Hand = List.of(new Card("Adv", 'F', 5),

@@ -1,4 +1,4 @@
-package org.example;
+package org.quest;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -64,7 +64,7 @@ public class Game {
     void handleEventCard(Player player, Card card) {
         switch (card.cardType) {
             case "Plague" -> handlePlague(player);
-            case "Queen’s favor" -> handleQueensFavor(player);
+            case "Queen's favor" -> handleQueensFavor(player);
             case "Prosperity" -> handleProsperity(player);
         }
     }

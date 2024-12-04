@@ -1,4 +1,4 @@
-package org.example;
+package org.quest;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;

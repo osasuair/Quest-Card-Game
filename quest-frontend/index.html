@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quest Game</title>
+</head>
+<body>
+    <h1>Quest Game</h1>
+
+    <div>
+        <div id="game-state">
+            <h2>Game State</h2>
+            <div id="players"></div>
+        </div>
+        <div>
+            <h3>Current Player: P<span id="turn"></span></h3>
+            <h3>Drawn Card: <span id="drawn-card"></span></h3>
+            <h4 id="sponsor-id" style="display: none"></h4>
+            <h4 id="stage-number" style="display: none"></h4>
+            <h4 id="participants" style="display: none"></h4>
+        </div>
+    </div>
+
+    <div>
+        <h2>Display: </h2>
+        <div id="output-text"></div>
+    </div>
+
+    <div>
+        <label for="card-index">Input: </label><input type="number" id="card-index" placeholder="Enter card index">
+        <button id="input-button" disabled=disabled>Select Card</button>
+        <button id="sponsor-button" style="visibility: hidden">Sponsor Quest</button>
+        <button id="no-sponsor-button" style="visibility: hidden">Don't Sponsor Quest</button>
+        <button id="participate-button" style="visibility: hidden">Participate in Quest</button>
+        <button id="no-participate-button" style="visibility: hidden">Don't Participate in Quest</button>
+    </div>
+    <div>
+        <button disabled=disabled onclick="drawCard()">Draw Card</button>
+        <button disabled=disabled onclick="nextTurn()">Next Turn</button>
+        <button id="clear-hotseat-button" disabled="disabled">Clear Hotseat</button>
+    </div>
+    <button id="start-game" onclick="startGame()">Start Game</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
