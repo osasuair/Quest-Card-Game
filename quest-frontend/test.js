@@ -157,10 +157,6 @@ async function winner2_game_2winner_quest() {
         await trimHand(driver, 3, ["F20", "F25", "F30"]);
         await driver.sleep(750);
 
-        // assert that only P2 and P4 have 7 shields
-        assert.strictEqual(await getShields(driver, 2), 7);
-        assert.strictEqual(await getShields(driver, 4), 7);
-
         // assert that output text declares P2 and P4 as winners
         const outputText = await driver.findElement(By.xpath("//div[@id='output-text']/p")).getText();
         assert.strictEqual(outputText, "Game Over - The winners are: P2, P4");
@@ -169,21 +165,25 @@ async function winner2_game_2winner_quest() {
         assert.deepEqual(await getHand(driver, 1),
             ["F15", "F15", "F20", "F20", "F20", "F20", "F25", "F25", "F30", "H10", "B15", "L20"]);
         assert.strictEqual(await getHandSize(driver, 1), 12);
+        assert.strictEqual(await getShields(driver, 1), 0);
 
         // assert P2 hand
         assert.deepEqual(await getHand(driver, 2),
             ["F10", "F15", "F15", "F25", "F30", "F40", "F50", "L20", "L20"]);
         assert.strictEqual(await getHandSize(driver, 2), 9);
+        assert.strictEqual(await getShields(driver, 2), 7);
 
         // assert P3 hand
         assert.deepEqual(await getHand(driver, 3),
             ["F20", "F40", "D5", "D5", "S10", "H10", "H10", "H10", "H10", "B15", "B15", "L20"]);
         assert.strictEqual(await getHandSize(driver, 3), 12);
+        assert.strictEqual(await getShields(driver, 3), 0);
 
         // assert P4 hand
         assert.deepEqual(await getHand(driver, 4),
             ["F15", "F15", "F20", "F25", "F30", "F50", "F70", "L20", "L20"]);
         assert.strictEqual(await getHandSize(driver, 4), 9);
+        assert.strictEqual(await getShields(driver, 4), 7);
     } catch (err) {
         console.error(err);
     } finally {
@@ -360,6 +360,7 @@ async function winner1_game_with_events() {
             4: ["H10"]
         });
 
+        driver.sleep(1000)
         assert.strictEqual(await getHandSize(driver, 4), 11); // assert that P4 has 11 cards
 
         // Stage 2
@@ -387,12 +388,6 @@ async function winner1_game_with_events() {
         // Sponsor trim
         await trimHand(driver, 1, ["F15", "F15", "F15"]);
 
-        // assert final shields amounts
-        assert.strictEqual(await getShields(driver, 1), 0);
-        assert.strictEqual(await getShields(driver, 2), 5);
-        assert.strictEqual(await getShields(driver, 3), 7);
-        assert.strictEqual(await getShields(driver, 4), 4);
-
         // assert that output text declares P3 as the winner
         const outputText = await driver.findElement(By.xpath("//div[@id='output-text']/p")).getText();
         assert.strictEqual(outputText, "Game Over - The winners are: P3");
@@ -401,15 +396,22 @@ async function winner1_game_with_events() {
         assert.deepEqual(await getHand(driver, 1),
             ["F25", "F25", "F35", "D5", "D5", "S10", "S10", "S10", "S10", "H10", "H10", "H10"]);
         assert.strictEqual(await getHandSize(driver, 1), 12);
+        assert.strictEqual(await getShields(driver, 1), 0);
+
         assert.deepEqual(await getHand(driver, 2),
             ["F15", "F25", "F30", "F40", "S10", "S10", "S10", "H10", "E30"]);
         assert.strictEqual(await getHandSize(driver, 2), 9);
+        assert.strictEqual(await getShields(driver, 2), 5);
+
         assert.deepEqual(await getHand(driver, 3),
             ["F10", "F25", "F30", "F40", "F50", "S10", "S10", "H10", "H10", "L20"]);
         assert.strictEqual(await getHandSize(driver, 3), 10);
+        assert.strictEqual(await getShields(driver, 3), 7);
+
         assert.deepEqual(await getHand(driver, 4),
             ["F25", "F25", "F30", "F50", "F70", "D5", "D5", "S10", "S10", "B15", "L20"]);
         assert.strictEqual(await getHandSize(driver, 4), 11);
+        assert.strictEqual(await getShields(driver, 4), 4);
 
     } catch (err) {
         console.error(err);
@@ -429,8 +431,8 @@ async function winner0_quest() {
         await driver.findElement(By.xpath("//button[contains(text(), 'Start Game')]")).click();
         await rigGameState(driver, "winner0_quest");
 
-        const player3Hand = await getHand(driver, 3);
-        const player4Hand = await getHand(driver, 4);
+        const player3OrgHand = await getHand(driver, 3);
+        const player4OrgHand = await getHand(driver, 4);
 
         // Draw Card
         await driver.findElement(By.xpath("//button[contains(text(), 'Draw Card')]")).click();
@@ -467,12 +469,13 @@ async function winner0_quest() {
         // • P1 draws 14 cards: 1xF5, 1xF10, 1xF15, 4 daggers, 4 horses, 3 swords
         assert.deepEqual(await getHand(driver, 1), ["F5", "F10", "F15", "D5", "D5", "D5", "D5", "S10", "S10", "S10", "H10", "H10", "H10", "H10"]);
 
-        // • P1 discards 1xF5, 1x10
-        await trimHand(driver, 1, ["F5", "F10"]);
-        await driver.sleep(750);
-
+        // Assert there are no winners
         let winners = await driver.findElement(By.id('participants')).getText();
         assert.strictEqual(winners, "Quest Winners: No winners for this quest");
+
+        // • P1 discards 1xF5, 1x10
+        await trimHand(driver, 1, ["F5", "F10"]);
+        await driver.sleep(1000);
 
         // • P1’s hand: 1xF15, 4 daggers, 4 horses, 3 swords
         assert.deepEqual(await getHand(driver, 1), ["F15", "D5", "D5", "D5", "D5", "S10", "S10", "S10", "H10", "H10", "H10", "H10"]);
@@ -485,9 +488,12 @@ async function winner0_quest() {
         assert.strictEqual(await getShields(driver, 2), 0);
 
         // • P3 and P4 have their initial hands
-        assert.deepEqual(await getHand(driver, 3), player3Hand);
+        assert.deepEqual(await getHand(driver, 3), player3OrgHand);
+        assert.strictEqual(await getHandSize(driver, 3), 12);
         assert.strictEqual(await getShields(driver, 3), 0);
-        assert.deepEqual(await getHand(driver, 4), player4Hand);
+
+        assert.deepEqual(await getHand(driver, 4), player4OrgHand);
+        assert.strictEqual(await getHandSize(driver, 4), 12);
         assert.strictEqual(await getShields(driver, 4), 0);
 
     } catch (err) {
@@ -565,6 +571,7 @@ async function a1_scenario() {
         // assert P1 has no shields and their hand is F5 F10 F15 F15 F30 Horse Axe Axe Lance (displayed in this order)
         assert.strictEqual(await getShields(driver, 1), 0);
         assert.deepEqual(await getHand(driver, 1), ["F5", "F10", "F15", "F15", "F30", "H10", "B15", "B15", "L20"]);
+        assert.strictEqual(await getHandSize(driver, 1), 9);
 
         // Stage 3
         await playerParticipateAndTrim(driver, 3);
@@ -591,10 +598,12 @@ async function a1_scenario() {
         // assert P3 has no shields and has the 5 cards: F5 F5 F15 F30 Sword
         assert.strictEqual(await getShields(driver, 3), 0);
         assert.deepEqual(await getHand(driver, 3), ["F5", "F5", "F15", "F30", "S10"]);
+        assert.strictEqual(await getHandSize(driver, 3), 5);
 
         // assert P4 has 4 shields and has the cards: F15 F15 F40 Lance
         assert.strictEqual(await getShields(driver, 4), 4);
         assert.deepEqual(await getHand(driver, 4), ["F15", "F15", "F40", "L20"]);
+        assert.strictEqual(await getHandSize(driver, 4), 4);
 
         // assert that P2 had 16 cards in hand (3 + 13 drawn)
         assert.strictEqual(await getHandSize(driver, 2), 16);
@@ -602,8 +611,10 @@ async function a1_scenario() {
         await driver.sleep(1000);
         await trimHand(driver, 2, ["F10", "F30", "F20", "F20"]);
 
-        // assert P2 has 12 cards in hand after trim
+        // assert P2 has 12 cards in hand after trim and 0 shields
         assert.strictEqual(await getHandSize(driver, 2), 12);
+        assert.strictEqual(await getShields(driver, 2), 0);
+
     } catch (err) {
         console.error(err);
     } finally {
@@ -713,21 +724,10 @@ async function rigGameState(driver, testVersion) {
 }
 
 async function integration_tests(){
-    console.time("winner2_game_2winner_quest");
     await winner2_game_2winner_quest();
-    console.timeEnd("winner2_game_2winner_quest");
-
-    console.time("winner1_game_with_events");
     await winner1_game_with_events();
-    console.timeEnd("winner1_game_with_events");
-
-    console.time("winner0_quest");
     await winner0_quest();
-    console.timeEnd("winner0_quest");
-
-    console.time("a1_scenario");
     await a1_scenario();
-    console.timeEnd("a1_scenario");
 }
 
 integration_tests()

@@ -191,9 +191,10 @@ public class GameLogic {
     private Response endQuest() {
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (gameState.questState.sponsor != null) {
+            if (gameState.questState.questCompleted && getQuestState().participants.isEmpty())
+                return Response.NO_WINNERS;
             if (getQuestState().currentAttackStage <= getQuestState().stages.size())
                 return Response.QUEST_NOT_COMPLETED;
-            if (getQuestState().participants.isEmpty()) return Response.NO_WINNERS;
 
             for (Player player : getQuestState().participants) {
                 player.shields += getQuestState().questSize;

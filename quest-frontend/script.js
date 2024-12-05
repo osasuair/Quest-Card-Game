@@ -412,14 +412,13 @@ async function handleQuestCard() {
     const winners = questState.participants.map(p => `P${p.id}`);
 
     let participantsBlock = document.getElementById("participants");
-    participantsBlock.textContent = "Quest Winners: No winners for this quest";
-    participantsBlock.textContent = `Quest Winners: ${winners.join(', ')}`;
+    participantsBlock.textContent = `Quest Winners: ${winners.length > 0 ? winners.join(', ') : "No winners for this quest"}`;
 
     await cleanupQuest(sponsorId);
     if (message === "NO_WINNERS") {
-        displayOutput("Everyone lost the quest.");
+        displayOutput("Quest Winners: No winners for this quest");
     } else {
-        displayOutput(`Quest winners are: ${winners.join(', ')}\nThey Gain ${questState.questSize} Shields!`);
+        displayOutput(`Quest Winners: ${winners.join(', ')}<br>They Gain ${questState.questSize} Shields!`);
     }
     cleanupQuestDisplay();
 
