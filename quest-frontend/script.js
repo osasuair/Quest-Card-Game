@@ -412,7 +412,7 @@ async function handleQuestCard() {
     const winners = questState.participants.map(p => `P${p.id}`);
 
     let participantsBlock = document.getElementById("participants");
-    participantsBlock.textContent = "Quest Winners: None";
+    participantsBlock.textContent = "Quest Winners: No winners for this quest";
     participantsBlock.textContent = `Quest Winners: ${winners.join(', ')}`;
 
     await cleanupQuest(sponsorId);

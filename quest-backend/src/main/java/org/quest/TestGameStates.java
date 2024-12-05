@@ -8,6 +8,8 @@ public class TestGameStates {
         return switch (testNum) {
             case "winner2_game_2winner_quest" -> winner2_game_2winner_quest_start_state();
             case "winner1_game_with_events" -> winner1_game_with_events_start_state();
+            case "winner0_quest" -> winner0_quest();
+            case "a1_scenario" -> a1_scenario();
             default -> null;
         };
     }
@@ -41,7 +43,7 @@ public class TestGameStates {
         return gameState;
     }
 
-    public static GameState winner2_game_2winner_quest_start_state() {
+    private static GameState winner2_game_2winner_quest_start_state() {
         GameState gameState = new GameState();
         gameState.adventureDeck.initAdventureDeck();
 
@@ -64,6 +66,51 @@ public class TestGameStates {
 
         return gameState;
     }
+
+    private static GameState winner0_quest() {
+        GameState gameState = new GameState();
+        gameState.adventureDeck.initAdventureDeck();
+
+        // Rig Hands
+        gameState.players[0].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F50, F70, D5, D5, S10, S10, H10, H10, B15, B15, L20, L20]"));
+        gameState.players[1].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F5, F10, F15, F15, F20, F20, F25, F30, F30, F40, E30]"));
+        gameState.players[2].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F5, F10, F15, F15, F20, F20, F25, F25, F30, F40, L20]"));
+        gameState.players[3].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F5, F10, F15, F15, F20, F20, F25, F25, F30, F50, E30]"));
+
+        // Rig Adventure Deck
+        gameState.adventureDeck.asList().addAll(0, pickCardsFromDeck(gameState.adventureDeck, "[F5, F15, F10, " +
+                                                                                              "F5, F10, F15, D5, D5, D5, D5, H10, H10, H10, H10, S10, S10, S10]"));
+
+        // Rig Quest Deck
+        gameState.questDeck.add(List.of(new Card("Quest", 'Q', 2),
+                                        new Card("Plague")));
+
+        return gameState;
+    }
+
+    private static GameState a1_scenario() {
+        GameState gameState = new GameState();
+        gameState.adventureDeck.initAdventureDeck();
+        gameState.adventureDeck.shuffle();
+
+        // Rig Hands
+        gameState.players[0].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F5, F15, F15, D5, S10, S10, H10, H10, B15, B15, L20]"));
+        gameState.players[1].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F5, F15, F15, F40, D5, S10, H10, H10, B15, B15, E30]"));
+        gameState.players[2].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F5, F5, F15, D5, S10, S10, S10, H10, H10, B15, L20]"));
+        gameState.players[3].pickCards(pickCardsFromDeck(gameState.adventureDeck, "[F5, F15, F15, F40, D5, D5, S10, H10, H10, B15, L20, E30]"));
+
+        gameState.adventureDeck.asList().addAll(0, pickCardsFromDeck(gameState.adventureDeck, "[F30, S10, B15, " +
+                                                                                              "F10, L20, L20, " +
+                                                                                              "B15, S10, " +
+                                                                                              "F30, L20, " +
+                                                                                              "F10, F30, F20, F20]"));
+
+        gameState.questDeck.add(List.of(new Card("Quest", 'Q', 4),
+                                        new Card("Plague")));
+
+        return gameState;
+    }
+
 
     /**
      * Helper function to pick cards from the adventure deck based on a string representation.

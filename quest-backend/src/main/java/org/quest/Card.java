@@ -34,16 +34,17 @@ public class Card implements Comparable<Card> {
     @Override
     public int compareTo(@NonNull Card card) {
         if (cardType.equals("Adv") && card.cardType.equals("Adv")) {
-            if (type == 'F' && card.type != 'F')
-                return -1;
-            if (type != 'F' && card.type == 'F')
-                return 1;
-            if (type == 'H' && card.type == 'S')
-                return 1;
-            if (type == 'S' && card.type == 'H')
-                return -1;
+            return getSortValue(this) - getSortValue(card);
         }
         return value - card.value;
+    }
+
+    private static int getSortValue(Card card) {
+        return (card.type == 'F' ? 0 : 100) + switch (card.type) {
+            case 'S' -> 10;
+            case 'H' -> 11;
+            default -> card.value;
+        };
     }
 
     @Override
