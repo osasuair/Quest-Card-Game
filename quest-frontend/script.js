@@ -40,8 +40,7 @@ async function nextTurn() {
         await displayGameState(gs); // Display updated state
 
         if ("TRIM_REQUIRED" === message) {
-            console.log("Message: ", message);
-            await trimCards(gs.currentPlayer+1);
+            await forceTrim(gs.currentPlayer+1);
         } else {
             displayOutput("Player " + (gs.currentPlayer+1) + " is up next!");
         }
@@ -95,10 +94,10 @@ async function handleProsperity() {
 
 async function handleQueensFavor() {
     try {
-        const response = await fetch(backendUrl + '/queens-favor');
-        const message = await response.json();
-        displayOutput("You Gain 2 Cards!");
+        const message = await fetch(backendUrl + '/queens-favor').then(response => response.json());
+        displayGameState(await getGameState());
 
+        displayOutput("You Gain 2 Cards!");
         if (message !== "SUCCESS")
             await forceTrim((await getGameState()).currentPlayer+1);
     } catch (error) {
@@ -361,7 +360,7 @@ async function handleQuestCard() {
     // Find sponsor
     let sponsorId = await findSponsor(gameState);
     if (sponsorId === null) {
-        console.log(await endQuest());
+        await endQuest();
         await cleanupQuest(sponsorId);
         displayOutput("No sponsor found. Quest Ended.");
         return;
@@ -496,11 +495,12 @@ async function forceTrimAllPlayers(gameState) {
         .then(response => response.json());
 
     // Find the player who needs trimming:
-    for (let i = 0; i < trimPlayers.length; i++) {
-        let currentPlayerId = (gameState.currentPlayer + i) % trimPlayers.length + 1;
-        if (trimPlayers.some(player => player.id === currentPlayerId))
+    for (let i = 0; i < 4; i++) {
+        let currentPlayerId = (gameState.currentPlayer + i) % 4 + 1;
+        if (trimPlayers.some(player => player.id === currentPlayerId)) {
             await forceTrim(currentPlayerId);
             await clearHotseat();
+        }
     }
     displayOutput("All players have trimmed their cards.");
 }
