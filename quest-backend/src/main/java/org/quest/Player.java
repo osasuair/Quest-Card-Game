@@ -1,11 +1,11 @@
-package org.example;
+package org.quest;
 
 import java.util.Collections;
 import java.util.List;
 
-class Player {
-    int id;
-    Deck hand;
+public class Player {
+    final int id;
+    private final Deck hand;
     int shields;
 
     public Player(int id) {
@@ -26,13 +26,26 @@ class Player {
         return card;
     }
 
-    Deck getDeck() {
+    boolean hasCard(Card card) {
+        return hand.asList().contains(card);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getShields() {
+        return shields;
+    }
+
+    public Deck getDeck() {
         sortHand();
         return hand;
     }
 
     public void pickCards(List<Card> cards) {
         hand.add(cards);
+        sortHand();
     }
 
     public void sortHand() {

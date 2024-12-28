@@ -1,10 +1,12 @@
-package org.example;
+package org.quest;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class Deck {
+public class Deck {
     static final int[] FOES_AMOUNT = {8, 7, 8, 7, 7, 4, 4, 2, 2, 1};
     static final int[] FOES_VALUES = {5, 10, 15, 20, 25, 30, 35, 40, 50, 70};
     static final char[] WEAPONS = {'D', 'H', 'S', 'B', 'L', 'E'};
@@ -14,8 +16,7 @@ class Deck {
     static final int[] QUEST_AMOUNTS = {3, 4, 3, 2};
     static final int[] QUEST_VALUES = {2, 3, 4, 5};
     static final int[] EVENTS_AMOUNTS = {1, 2, 2};
-    static final String[] EVENTS = {"Plague", "Queen’s favor", "Prosperity"};
-
+    static final String[] EVENTS = {"Plague", "Queen's favor", "Prosperity"};
     private final ArrayList<Card> deck = new ArrayList<>();
     private final ArrayList<Card> discard = new ArrayList<>();
 
@@ -83,10 +84,7 @@ class Deck {
         deck.addAll(cards);
     }
 
-    void remove(List<Card> removeList) {
-        deck.removeAll(removeList);
-    }
-
+    @JsonValue
     List<Card> asList() {
         return deck;
     }
