@@ -4,65 +4,49 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class Game {
-    final Player[] players;
-    int currentPlayer;
-    Deck adventureDeck, questDeck;
+    GameState gameState;
     PrintWriter output;
     Scanner input;
 
-    public Game(int playersAmount, Scanner input, PrintWriter output) {
+    public Game(Scanner input, PrintWriter output) {
         this.output = output;
         this.input = input;
-        currentPlayer = 0;
-        adventureDeck = new Deck();
-        questDeck = new Deck();
-        players = new Player[playersAmount];
-        for (int i = 0; i < playersAmount; ++i) {
-            players[i] = new Player(i + 1);
-        }
+        gameState = new GameState();
     }
 
-    void initPlayers() {
-        for (Player player : players) {
-            player.pickCards(adventureDeck.draw(12));
-        }
-    }
-
-    void setupGame() {
-        adventureDeck.initAdventureDeck();
-        questDeck.initQuestDeck();
-        adventureDeck.shuffle();
-        questDeck.shuffle();
-        initPlayers();
+    void startGameState() {
+        GameLogic.startGame(gameState);
     }
 
     public void start() {
-        setupGame();
+        startGameState();
         List<Player> winners;
         do {
-            Player player = players[currentPlayer];
+            Player player = gameState.players[gameState.currentPlayer];
             playTurn(player);
-            currentPlayer = (currentPlayer + 1) % players.length;
-        } while ((winners = checkWinners()).isEmpty());
+            GameLogic.nextTurn(gameState);
+            GameLogic.updateWinners(gameState);
+        } while ((winners = gameState.winners).isEmpty());
         displayWinners(winners);
     }
 
     void playTurn(Player player) {
         print(player + "'s turn - Hand: " + player.getDeck());
-        Card card = questDeck.draw();
+        GameLogic.drawQuestCard(gameState);
+        Card card = gameState.currentCard;
         print("Player " + player + " drew " + card);
 
         if (card.type == 'Q') {
-            handleQuestCard(player, card);
+            handleQuestCard(player);
         } else {
-            handleEventCard(player, card);
+            handleEventCard(player);
         }
 
         clearHotseat(player + "'s turn is over, press Enter to continue");
     }
 
-    void handleEventCard(Player player, Card card) {
-        switch (card.cardType) {
+    void handleEventCard(Player player) {
+        switch (gameState.currentCard.cardType) {
             case "Plague" -> handlePlague(player);
             case "Queen's favor" -> handleQueensFavor(player);
             case "Prosperity" -> handleProsperity(player);
@@ -71,11 +55,11 @@ public class Game {
 
     private void handleProsperity(Player player) {
         print("All players draw 2 Adventure cards");
+        GameLogic.prosperity(gameState);
         int currentPlayer = player.id - 1;
-        for (int i = 0; i < players.length; ++i) {
-            Player p = players[(currentPlayer + i) % players.length];
+        for (int i = 0; i < 4; ++i) {
+            Player p = gameState.players[(currentPlayer + i) % 4];
             print("Player " + p + " draws 2 Adventure cards");
-            p.pickCards(adventureDeck.draw(2));
             trimHand(p);
             clearScreen();
         }
@@ -83,35 +67,41 @@ public class Game {
 
     void handleQueensFavor(Player player) {
         print("Player " + player + " draws 2 Adventure cards");
-        player.pickCards(adventureDeck.draw(2));
+        GameLogic.queensFavor(gameState);
         trimHand(player);
     }
 
     void handlePlague(Player player) {
         print("Player " + player + " losses 2 shields");
-        player.shields = (player.shields < 2) ? 0 : player.shields - 2;
+        GameLogic.plague(gameState);
     }
 
-    void handleQuestCard(Player player, Card card) {
-        Player sponsor = findSponsor(player.id - 1, card);
-        if (sponsor == null) {
+    void handleQuestCard(Player player) {
+        GameLogic.startQuest(gameState);
+        int sponsor = findSponsor(player.id - 1, gameState.currentCard);
+        if (sponsor == -1) {
             print("No sponsor found for the Quest");
+            GameLogic.endQuest(gameState);
+            GameLogic.cleanupQuest(gameState);
             return;
         }
-        List<List<Card>> stages = setupQuest(sponsor, card);
+        GameLogic.sponsorQuest(gameState, sponsor);
+
+        setupQuest(gameState.questState.sponsor, gameState.questState.questSize);
         clearScreen();
-        List<Player> winners = playQuest(sponsor, stages);
+
+        playQuest(gameState.questState.questSize);
         clearScreen();
-        declareWinners(card, winners);
-        cleanupQuest(sponsor, stages);
+
+        GameLogic.endQuest(gameState);
+        declareWinners(gameState.currentCard, gameState.questState.participants);
+        cleanupQuest();
     }
 
     public void declareWinners(Card card, List<Player> winners) {
         if (!winners.isEmpty()) {
             print("Players " + winners + " win the quest and gain " + card.value + " shields");
-            // Update winners
             for (Player p : winners) {
-                p.shields += card.value;
                 print("Player " + p + " now has " + p.shields + " shields");
             }
         } else {
@@ -119,18 +109,13 @@ public class Game {
         }
     }
 
-    List<List<Card>> setupQuest(Player sponsor, Card card) {
-        List<List<Card>> stages = new ArrayList<>();
-        for (int i = 1; i <= card.value; ++i) {
-            List<Card> previousStage = i > 1 ? stages.get(i - 2) : new ArrayList<>();
-            int previousStageValue = getStageValue(previousStage);
-            stages.add(setupStage(sponsor, i, previousStageValue));
+    void setupQuest(Player sponsor, int stages) {
+        for (int i = 1; i <= stages; ++i) {
+            setupStage(sponsor, i);
         }
-        return stages;
     }
 
-    List<Card> setupStage(Player sponsor, int currStage, int previousStageValue) {
-        List<Card> stage = new ArrayList<>();
+    void setupStage(Player sponsor, int currStage) {
         print("Player " + sponsor + ": ");
         while (true) {
             print("Select a card for stage " + currStage + " or enter 'Quit' to finish stage setup");
@@ -138,170 +123,122 @@ public class Game {
             String cardIndex = input.nextLine();
 
             if (cardIndex.equalsIgnoreCase("Quit")) {
-                if (stage.isEmpty())
+                Response res = GameLogic.quitStage(gameState);
+                if (res == Response.NO_CARDS_IN_STAGE)
                     print("A stage cannot be empty");
-                else if (!largerThanLastStage(stage, previousStageValue))
+                else if (res == Response.INSUFFICIENT_STAGE_VALUE)
                     print("Insufficient value for this stage");
                 else {
-                    print("Stage " + currStage + ": " + stage);
+                    print("Stage " + currStage + ": " + gameState.questState.stages.get(currStage - 1));
                     break;
                 }
                 continue;
             }
 
-            Card cardSelected = sponsor.getCard(Integer.parseInt(cardIndex));
-            if (cardSelected == null) {
+            try { Integer.parseInt(cardIndex);}
+            catch (NumberFormatException e) {
                 print("Invalid card index");
-            } else if (multipleFoes(cardSelected, stage)) {
+                continue;
+            }
+            Card cardSelected = sponsor.getCard(Integer.parseInt(cardIndex));
+            Response res = GameLogic.addCardToStage(gameState, cardSelected);
+            if (res == Response.INVALID_INPUT) {
+                print("Invalid card index");
+            } else if (res == Response.MULTIPLE_FOES) {
                 print("Invalid card, only one foe card is allowed (Sole foe)");
-            } else if (repeatedWeapon(cardSelected, stage)) {
+            } else if (res == Response.REPEATED_WEAPON) {
                 print("Invalid card, Weapon cards must be different (non-repeated weapon card)");
-            } else {
-                stage.add(sponsor.playCard(cardSelected));
             }
         }
-        return stage;
     }
 
-    Player findSponsor(int currentPlayer, Card card) {
-        Player sponsor = null;
-        for (int i = 0; i < players.length && sponsor == null; ++i) {
-            Player p = players[(currentPlayer + i) % players.length];
-            sponsor = promptSponsor(p, card) ? p : null;
+    int findSponsor(int currentPlayer, Card card) {
+        int sponsor = -1;
+        for (int i = 0; i < 4 && sponsor == -1; ++i) {
+            int player = (currentPlayer + i) % 4;
+            sponsor = promptSponsor(player+1, card) ? player+1 : -1;
         }
         return sponsor;
     }
 
-    boolean promptSponsor(Player p, Card c) {
-        print(p + ": Do you want to sponsor the quest " + c + "? (y/n)");
+    boolean promptSponsor(int p, Card c) {
+        print("P" + p + ": Do you want to sponsor the quest " + c + "? (y/n)");
         return input.nextLine().equals("y");
     }
 
-    List<Player> playQuest(Player sponsor, List<List<Card>> stages) {
-        // Determine Eligible Players
-        List<Player> stagePlayers = new LinkedList<>(Arrays.asList(players));
-        stagePlayers.remove(sponsor);
-
-        int stageIndex = 1;
-        for (List<Card> stage : stages) {
-            print("Stage: " + stageIndex++);
-            if (!playStage(stagePlayers, stage))
+    void playQuest(int stages) {
+        for (int stage = 0; stage<stages; ++stage) {
+            print("Stage: " + stage);
+            if (!playStage())
                 break;
         }
-        return stagePlayers;
     }
 
 
-    boolean playStage(List<Player> stagePlayers, List<Card> stage) {
-        print("Eligible Players: " + stagePlayers);
-        withdrawPlayers(stagePlayers);
-        if (stagePlayers.isEmpty()) return false;
-
-        Map<Player, List<Card>> attacks = setupAttacks(stagePlayers);
-        adventureDeck.discard(attacks.values().stream().flatMap(List::stream).toList());  // Discard all attack cards
-        return resolveAttacks(stagePlayers, attacks, getStageValue(stage));
+    boolean playStage() {
+        print("Eligible Players: " + gameState.questState.participants);
+        withdrawPlayers();
+        if (gameState.questState.participants.isEmpty()) return false;
+        setupAttacks();
+        return resolveAttacks();
     }
 
-    public static int getStageValue(List<Card> stage) {
-        return stage.stream().mapToInt(card -> card.value).sum();
-    }
-
-    Map<Player, List<Card>> setupAttacks(List<Player> stagePlayers) {
-        Map<Player, List<Card>> attacks = new HashMap<>();
-        for (Player player : stagePlayers) {
-            List<Card> attack = setupAttack(player);
-            attacks.put(player, attack);
+    void setupAttacks() {
+        for (Player player : gameState.questState.participants) {
+            setupAttack(player);
             clearScreen();
         }
-        return attacks;
     }
 
-
-    List<Card> setupAttack(Player player) {
-        List<Card> attack = new ArrayList<>();
+    void setupAttack(Player player) {
         print("Player " + player + " setup attack");
         while (true) {
             print(player + "'s Deck: " + player.getDeck());
             print("Select a card for the attack or enter 'Quit' to finish attack setup");
             String cardIndex = input.nextLine();
+
             if (cardIndex.equalsIgnoreCase("Quit")) {
-                print(player + "'s attack: " + attack);
+                GameLogic.quitAttack(gameState, player.id);
+                print(player + "'s attack: " + gameState.questState.attacks.get(player.id));
                 break;
             }
 
             Card card = player.getCard(Integer.parseInt(cardIndex));
-            if (card == null) {
+            Response res = GameLogic.addCardToAttack(gameState, player.id, card);
+            if (res == Response.INVALID_INPUT) {
                 print("Invalid card index");
-            } else if (card.type == 'F') {
+            } else if (res == Response.NO_FOES_IN_ATTACK) {
                 print("Invalid card, Foe cards are not allowed in attack");
-            } else if (repeatedWeapon(card, attack)) {
+            } else if (res == Response.REPEATED_WEAPON) {
                 print("Invalid card, Weapon cards must be different (non-repeated weapon card)");
-            } else {
-                attack.add(player.playCard(card));
             }
         }
-        return attack;
     }
 
-    boolean resolveAttacks(List<Player> stagePlayers, Map<Player, List<Card>> attacks, int stageValue) {
-        List<Player> playersToRemove = new ArrayList<>();
-        for (Player player : stagePlayers) {
-            if (resolveAttack(attacks.get(player), stageValue))
-                print("Player " + player + " passed the stage");
-            else {
-                playersToRemove.add(player);
-                print("Player " + player + " failed the quest");
-            }
-        }
-        stagePlayers.removeAll(playersToRemove);
-        return !stagePlayers.isEmpty();
+    boolean resolveAttacks() {
+        Response res = GameLogic.resolveAttacks(gameState);
+        return res != Response.QUEST_COMPLETED;
     }
 
-    boolean resolveAttack(List<Card> attack, int stageValue) {
-        int attackPower = getStageValue(attack);
-        return attackPower >= stageValue;
-    }
-
-    void cleanupQuest(Player sponsor, List<List<Card>> stageSetup) {
-        for (List<Card> stageDiscard : stageSetup) {
-            adventureDeck.discard(stageDiscard);
-        }
-        int cardsToPickup = stageSetup.stream().mapToInt(List::size).sum() + stageSetup.size();
-        sponsor.pickCards(adventureDeck.draw(cardsToPickup));
+    void cleanupQuest() {
+        Player sponsor = gameState.questState.sponsor;
+        GameLogic.cleanupQuest(gameState);
         trimHand(sponsor);
         print("Sponsor " + sponsor + " deck: " + sponsor.getDeck());
     }
 
-    private boolean multipleFoes(Card cardSelected, List<Card> cards) {
-        return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
-    }
-
-    private boolean repeatedWeapon(Card cardSelected, List<Card> cards) {
-        return cards.stream().anyMatch(card -> card.type == cardSelected.type);
-    }
-
-    private boolean largerThanLastStage(List<Card> currStage, int previousStageValue) {
-        int currentStageValue = getStageValue(currStage);
-        return currentStageValue > previousStageValue;
-    }
-
-    void withdrawPlayers(List<Player> stagePlayers) {
-        List<Player> playersToRemove = new ArrayList<>();
-        for (Player player : stagePlayers) {
+    void withdrawPlayers() {
+        List<Player> tempParticipants = new ArrayList<>(gameState.questState.participants);
+        for (Player player : tempParticipants) {
             print(player + ": Do you want to withdraw from the quest? (y/n)");
             String answer = input.nextLine();
-            if (answer.equals("y")) {
-                playersToRemove.add(player);
-                clearScreen();
-                continue;
+            Response res = GameLogic.participateInQuest(gameState, player.id, answer.equals("n"));
+            if (answer.equals("n")) print(player + " draws 1 Adventure card");
+            if (res == Response.TRIM_REQUIRED) {
+                trimHand(player);
             }
-            List<Card> drawn = adventureDeck.draw(1);
-            print(player + " draws 1 Adventure card ("+ drawn.getFirst() + ")");
-            player.pickCards(drawn);
-            trimHand(player);
             clearScreen();
         }
-        stagePlayers.removeAll(playersToRemove);
     }
 
     Card selectCard(Player player) {
@@ -319,27 +256,14 @@ public class Game {
     }
 
     void trimHand(Player player) {
-        int cardsToRemove = computeTrim(player);
+        int cardsToRemove = GameLogic.computeTrim(player);
         if (cardsToRemove == 0) return;
         print("Player " + player + " has more than 12 cards, select " + cardsToRemove + " cards to discard");
+        print("Player" + player + "'s hand: " + player.getDeck());
         for (int i = 0; i < cardsToRemove; ++i) {
-            adventureDeck.discard(player.playCard(selectCard(player)));
+            GameLogic.trimCard(gameState, player.id, selectCard(player));
             print(player + "'s trimmed hand: " + player.getDeck());
         }
-    }
-
-    int computeTrim(Player player) {
-        return player.getDeck().size() > 12 ? player.getDeck().size() - 12 : 0;
-    }
-
-    List<Player> checkWinners() {
-        ArrayList<Player> winners = new ArrayList<>();
-        for (Player player : players) {
-            if (player.shields >= 7) {
-                winners.add(player);
-            }
-        }
-        return winners;
     }
 
     void displayWinners(List<Player> winners) {

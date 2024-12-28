@@ -25,7 +25,6 @@ public class GameSteps {
     private final int[] previousShields = new int[4];
     private final int[] previousCards = new int[4];
     private Game game;
-    private QuestDetails questDetails;
 
     /**
      * Generates input for players building the stages of a quest.
@@ -250,11 +249,14 @@ public class GameSteps {
      */
     private String getParticipationInput(List<String> participants, List<Map<String, String>> discardTable) {
         StringBuilder input = new StringBuilder();
-        Map<String, String> playerTrimIndices = getDiscardInputMap(discardTable, List.of(game.players));
+        Map<String, String> playerTrimIndices = getDiscardInputMap(discardTable, List.of(game.gameState.players));
 
-        for (Player player : questDetails.players) {
-            if (participants.contains(player.toString()))
-                input.append(NO_INPUT).append(playerTrimIndices.get(player.toString()));
+        for (Player player : game.gameState.questState.participants) {
+            if (participants.contains(player.toString())) {
+                input.append(NO_INPUT);
+                if (playerTrimIndices.containsKey(player.toString()))
+                    input.append(playerTrimIndices.get(player.toString()));
+            }
             else
                 input.append(YES_INPUT);
         }
@@ -268,7 +270,7 @@ public class GameSteps {
      * @return A string representing the input for the game.
      */
     private String getSponsorInput(int player) {
-        int noCount = (player - 1 - game.currentPlayer + NUM_PLAYERS) % NUM_PLAYERS;
+        int noCount = (player - 1 - game.gameState.currentPlayer + NUM_PLAYERS) % NUM_PLAYERS;
         return NO_INPUT.repeat(noCount) + YES_INPUT;
     }
 
@@ -286,10 +288,10 @@ public class GameSteps {
         }
 
         StringBuilder input = new StringBuilder();
-        Map<String, String> discardMap = getDiscardInputMap(discardTable, List.of(game.players));
+        Map<String, String> discardMap = getDiscardInputMap(discardTable, List.of(game.gameState.players));
 
         for (int i = 0; i < NUM_PLAYERS; i++) {
-            Player p = game.players[(player - 1 + i) % NUM_PLAYERS];
+            Player p = game.gameState.players[(player - 1 + i) % NUM_PLAYERS];
             if (discardMap.containsKey(p.toString()))
                 input.append(discardMap.get(p.toString()));
         }
@@ -317,8 +319,8 @@ public class GameSteps {
 
     private void updateHistory() {
         for (int i = 0; i < 4; i++) {
-            previousShields[i] = game.players[i].shields;
-            previousCards[i] = game.players[i].getDeck().size();
+            previousShields[i] = game.gameState.players[i].shields;
+            previousCards[i] = game.gameState.players[i].getDeck().size();
         }
     }
 
@@ -327,8 +329,8 @@ public class GameSteps {
      */
     @Given("a rigged game of Quest starts based on the jp_scenario from A1")
     public void aRiggedJp_scenarioGameOfQuestStarts() {
-        game = ATestHelper.rigGameSetupATest1(input, output);
-        game.setupGame();
+        game = new Game(input, output);
+        GameLogic.setupGameState(game.gameState, "a1_scenario");
     }
 
     /**
@@ -344,7 +346,7 @@ public class GameSteps {
         List<String> players = parseStringList(playersStr);
         for (int i = 0; i < 4; i++) {
             if (players.contains("P" + (i + 1))) {
-                assertEquals(previousShields[i] + shieldChange, game.players[i].shields);
+                assertEquals(previousShields[i] + shieldChange, game.gameState.players[i].shields);
             }
         }
     }
@@ -357,12 +359,10 @@ public class GameSteps {
      */
     @When("P{int} draws a {int} stage quest")
     public void DrawsAStageQuest(int player, int stage) {
-        game.questDeck.asList().addFirst(new Card("Quest", 'Q', stage));
-        game.currentPlayer = player - 1;
+        game.gameState.currentCard = new Card("Quest", 'Q', stage);
+        game.gameState.currentPlayer = player - 1;
 
-        questDetails = new QuestDetails();
-        questDetails.card = game.questDeck.draw(); // Draw the quest card
-        questDetails.sponsorHand = game.players[player - 1].getDeck().asList();
+        GameLogic.startQuest(game.gameState);
         updateHistory();
     }
 
@@ -374,9 +374,8 @@ public class GameSteps {
     @Then("P{int} sponsors the quest")
     public void pSponsorsTheQuest(int player) {
         game.input = new Scanner(getSponsorInput(player));
-        questDetails.sponsor = game.findSponsor(game.currentPlayer, questDetails.card);
-        questDetails.players = new ArrayList<>(Arrays.asList(game.players));
-        questDetails.players.remove(questDetails.sponsor);
+        int sponsor = game.findSponsor(game.gameState.currentPlayer, game.gameState.currentCard);
+        GameLogic.sponsorQuest(game.gameState, sponsor);
     }
 
     /**
@@ -388,9 +387,11 @@ public class GameSteps {
      */
     @And("P{int} builds the {int} stages")
     public void pBuildsTheStages(int player, int stages, DataTable table) {
-        Player sponsor = game.players[player - 1];
+        if( player == 1 && stages ==2)
+            System.out.println("here");
+        Player sponsor = game.gameState.questState.sponsor;
         game.input = new Scanner(getStageBuildInput(sponsor, stages, table.asMaps()));
-        questDetails.stages = game.setupQuest(sponsor, questDetails.card);
+        game.setupQuest(sponsor, game.gameState.questState.questSize);
         updateHistory();
     }
 
@@ -405,10 +406,11 @@ public class GameSteps {
         List<String> participants = parseStringList(players);
         List<Map<String, String>> rows = discardTable.asMaps();
 
-        game.input = new Scanner(getParticipationInput(participants, rows));
-        game.withdrawPlayers(questDetails.players);
+        String participationInput = getParticipationInput(participants, rows);
+        game.input = new Scanner(participationInput);
+        game.withdrawPlayers();
 
-        assertEquals(participants.size(), questDetails.players.size());
+        assertEquals(participants.size(), game.gameState.questState.participants.size());
     }
 
     /**
@@ -420,7 +422,7 @@ public class GameSteps {
     @And("Players build their stage {int} attack")
     public void playersBuildTheirAttack(int stage, DataTable attackTable) {
         List<Map<String, String>> attackMap = attackTable.asMaps();
-        game.input = new Scanner(getAttackBuildInput(game.players, attackMap));
+        game.input = new Scanner(getAttackBuildInput(game.gameState.players, attackMap));
     }
 
     /**
@@ -430,9 +432,8 @@ public class GameSteps {
      */
     @And("Players attack the stage {int}")
     public void playersAttackTheStage(int stage) {
-        Map<Player, List<Card>> attacks = game.setupAttacks(questDetails.players);
-        int stageValue = Game.getStageValue(questDetails.stages.get(stage - 1));
-        game.resolveAttacks(questDetails.players, attacks, stageValue);
+        game.setupAttacks();
+        game.resolveAttacks();
     }
 
     /**
@@ -444,8 +445,8 @@ public class GameSteps {
     @And("Players {string} should pass stage {int}")
     public void playersShouldPassStages(String playersStr, int stage) {
         List<String> players = parseStringList(playersStr);
-        assertEquals(players.size(), questDetails.players.size());
-        for (Player passers : questDetails.players) {
+        assertEquals(players.size(), game.gameState.questState.participants.size());
+        for (Player passers : game.gameState.questState.participants) {
             assertTrue(players.contains("P" + passers.id));
         }
     }
@@ -458,10 +459,11 @@ public class GameSteps {
      */
     @And("P{int}'s quest is cleaned up")
     public void pQuestIsCleanedUp(int player, DataTable discardTable) {
-        Map<String, String> discardMap = getDiscardInputMap(discardTable.asMaps(), List.of(game.players));
+        Map<String, String> discardMap = getDiscardInputMap(discardTable.asMaps(), List.of(game.gameState.players));
         game.input = new Scanner(discardMap.get("P" + player));
-        game.cleanupQuest(questDetails.sponsor, questDetails.stages);
-        game.declareWinners(questDetails.card, questDetails.players);
+        GameLogic.endQuest(game.gameState);
+        game.declareWinners(game.gameState.currentCard, game.gameState.questState.participants);
+        game.cleanupQuest();
     }
 
     /**
@@ -474,10 +476,10 @@ public class GameSteps {
     public void pShouldDiscardAndDrawCards(int sponsor, int numCards) {
         int expectedHandSize = previousCards[sponsor - 1] + numCards;
         int trim = Math.max(0, expectedHandSize - MAX_HAND_SIZE);
-        List<Card> sponsorNewHand = questDetails.sponsor.getDeck().asList();
+        List<Card> sponsorNewHand = game.gameState.players[sponsor-1].getDeck().asList();
 
         assertEquals(expectedHandSize - trim, sponsorNewHand.size()); // Could only be true if player drew cards
-        assertTrue(game.adventureDeck.discardSize() > numCards);
+        assertTrue(game.gameState.adventureDeck.discardSize() > numCards);
     }
 
     /**
@@ -491,7 +493,7 @@ public class GameSteps {
         List<Card> expectedHand = parseStringList(cards).stream()
                 .map(s -> new Card("Adv", s.charAt(0), Integer.parseInt(s.substring(1))))
                 .toList();
-        List<Card> actualHand = game.players[getPlayerId(player) - 1].getDeck().asList();
+        List<Card> actualHand = game.gameState.players[getPlayerId(player) - 1].getDeck().asList();
 
         assertEquals(expectedHand, actualHand);
     }
@@ -504,7 +506,7 @@ public class GameSteps {
      */
     @And("Player P{int} should have {int} cards")
     public void playerPShouldHaveNumCards(int player, int numCards) {
-        assertEquals(numCards, game.players[player - 1].getDeck().size());
+        assertEquals(numCards, game.gameState.players[player - 1].getDeck().size());
     }
 
     /**
@@ -513,19 +515,19 @@ public class GameSteps {
      */
     @Given("a rigged 2winner game of Quest starts")
     public void aRigged2WinnerGameOfQuestStarts() {
-        game = new Game(NUM_PLAYERS, input, output);
+        game = new Game(input, output);
 
         // Set Adventure deck
-        game.adventureDeck.initAdventureDeck();
+        game.gameState.adventureDeck.initAdventureDeck();
 
         // Set players' hands
-        game.players[0].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[0].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, F5, F10, F10, F15, F15, F20, D5, D5, H10, H10, B15]"));
-        game.players[1].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[1].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, S10, S10, S10, S10, H10, H10, B15, B15, L20, L20, E30]"));
-        game.players[2].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[2].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, F10, F15, F40, D5, D5, S10, H10, H10, B15, L20, L20]"));
-        game.players[3].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[3].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, S10, S10, S10, S10, H10, H10, B15, B15, L20, L20, E30]"));
 
         updateHistory();
@@ -537,19 +539,19 @@ public class GameSteps {
      */
     @Given("a rigged 1winner game of Quest starts")
     public void a_rigged_1winner_game_of_quest_starts() {
-        game = new Game(NUM_PLAYERS, input, output);
+        game = new Game(input, output);
 
         // Set Adventure deck
-        game.adventureDeck.initAdventureDeck();
+        game.gameState.adventureDeck.initAdventureDeck();
 
         // Set players' hands
-        game.players[0].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[0].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, F5, F10, F10, F15, F15, F20, D5, D5, H10, H10, B15]"));
-        game.players[1].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[1].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, S10, S10, S10, S10, H10, H10, B15, B15, L20, L20, E30]"));
-        game.players[2].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[2].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, S10, S10, S10, S10, H10, H10, B15, B15, L20, L20, E30]"));
-        game.players[3].pickCards(pickCardsFromDeck(game.adventureDeck,
+        game.gameState.players[3].pickCards(pickCardsFromDeck(game.gameState.adventureDeck,
                                                     "[F5, F15, F15, F40, D5, D5, S10, H10, H10, B15, L20, L20]"));
 
         updateHistory();
@@ -565,9 +567,10 @@ public class GameSteps {
     public void pHostsAStageQuest(int player, int stages) {
         updateHistory();
         // game depends on currentPlayer to be set
-        game.questDeck.asList().addFirst(new Card("Quest", 'Q', stages));
+        game.gameState.questDeck.asList().addFirst(new Card("Quest", 'Q', stages));
         game.input = new Scanner(getInputForQuest(stages) + "\n"); // input for ending turn
-        game.playTurn(game.players[(game.currentPlayer = player - 1)]);
+        game.playTurn(game.gameState.players[(game.gameState.currentPlayer = player - 1)]);
+        GameLogic.nextTurn(game.gameState);
     }
 
     /**
@@ -580,9 +583,10 @@ public class GameSteps {
     @And("P{int} draws a {string} event card")
     public void pDrawsEventCard(int player, String event, DataTable discardTable) {
         updateHistory();
-        game.questDeck.asList().addFirst(new Card(event));
+        game.gameState.questDeck.asList().addFirst(new Card(event));
         game.input = new Scanner(getEventCardInput(event, player, discardTable.asMaps()) + "\n");
-        game.playTurn(game.players[(game.currentPlayer = player - 1)]);
+        game.playTurn(game.gameState.players[(game.gameState.currentPlayer = player - 1)]);
+        GameLogic.nextTurn(game.gameState);
     }
 
     /**
@@ -596,9 +600,9 @@ public class GameSteps {
         List<String> players = parseStringList(playersStr);
         for (int i = 0; i < 4; i++) {
             if (players.contains("P" + (i + 1)))
-                assertEquals(Math.min(previousCards[i] + numCards, MAX_HAND_SIZE), game.players[i].getDeck().size());
+                assertEquals(Math.min(previousCards[i] + numCards, MAX_HAND_SIZE), game.gameState.players[i].getDeck().size());
             else
-                assertEquals(previousCards[i], game.players[i].getDeck().size());
+                assertEquals(previousCards[i], game.gameState.players[i].getDeck().size());
         }
         updateHistory();
     }
@@ -611,7 +615,7 @@ public class GameSteps {
     @And("Players {string} should be declared the winner")
     public void playersShouldBeDeclaredTheWinner(String playersStr) {
         List<String> players = parseStringList(playersStr);
-        List<Player> winners = game.checkWinners();
+        List<Player> winners = game.gameState.winners;
 
         assertEquals(players.size(), winners.size());
         for (Player winner : winners) {
@@ -624,12 +628,13 @@ public class GameSteps {
      */
     @Given("a rigged 0winner game of Quest starts")
     public void aRigged0WinnerGameOfQuestStarts() {
-        game = new Game(NUM_PLAYERS, input, output);
-        game.setupGame();
-        game.adventureDeck.initAdventureDeck();
+        game = new Game(input, output);
+        game.gameState.adventureDeck.initAdventureDeck();
+        GameLogic.initPlayers(game.gameState);
 
-        game.players[0].getDeck().asList().clear();
-        game.players[0].pickCards(pickCardsFromDeck(game.adventureDeck, "[F5, F10, F15, F10, F15, F15, D5, D5, D5, H10, H10, B15]"));
+        game.gameState.players[0].getDeck().asList().clear();
+        game.gameState.adventureDeck.initAdventureDeck();
+        game.gameState.players[0].pickCards(pickCardsFromDeck(game.gameState.adventureDeck, "[F5, F10, F15, F10, F15, F15, D5, D5, D5, H10, H10, B15]"));
 
         updateHistory();
     }
@@ -639,18 +644,7 @@ public class GameSteps {
         List<String> players = parseStringList(playersStr);
         for (int i = 0; i < 4; i++) {
             if (players.contains("P" + (i + 1)))
-                assertEquals(numShields, game.players[i].shields);
+                assertEquals(numShields, game.gameState.players[i].shields);
         }
-    }
-
-    /**
-     * Inner class to store details about the current quest.
-     */
-    public static class QuestDetails {
-        Player sponsor;
-        Card card;
-        List<List<Card>> stages;
-        List<Player> players;
-        List<Card> sponsorHand;
     }
 }

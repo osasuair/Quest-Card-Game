@@ -117,8 +117,6 @@ Feature: Quest Game
       | 3     | [F15] |
     And Players '[P2, P4]' participate in stage
       | player | discard  |
-      | P2     | first[1] |
-      | P4     | first[1] |
     And Players build their stage 1 attack
       | player | attack |
       | P2     | [S10]  |

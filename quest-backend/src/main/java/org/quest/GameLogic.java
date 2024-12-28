@@ -1,7 +1,5 @@
 package org.quest;
 
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,13 +9,7 @@ import java.util.Map;
  * This class implements the game logic for a card-based quest game.
  * It manages the game state, processes player actions, and enforces the rules of the game.
  */
-@Service
 public class GameLogic {
-    private GameState gameState; // To hold the current game state
-
-    GameLogic() {
-        startGame();
-    }
 
     /**
      * Discards a collection of lists of cards from the adventure deck.
@@ -90,16 +82,12 @@ public class GameLogic {
         return player.getDeck().size() > 12 ? player.getDeck().size() - 12 : 0;
     }
 
-    public GameState getGameState() {
-        return gameState;
-    }
-
     /**
      * Returns the current quest state.
      *
      * @return The current QuestState object, or null if no quest is in progress.
      */
-    public QuestState getQuestState() {
+    public QuestState getQuestState(GameState gameState) {
         return gameState.questState;
     }
 
@@ -110,38 +98,27 @@ public class GameLogic {
      * @param arg    Optional arguments required for the action.
      * @return A Response enum value indicating the result of the action.
      */
-    public Response processAction(ActionType action, Object... arg) {
+    public static Response processAction(GameState gameState, ActionType action, Object... arg) {
         return switch (action) {
-            case START_GAME -> startGame();
-            case DRAW_QUEST_CARD -> drawQuestCard();
-            case PLAGUE -> plague();
-            case QUEENS_FAVOR -> queensFavor();
-            case PROSPERITY -> prosperity();
-            case TRIM_CARD -> trimCard(arg[0], arg[1]);
-            case START_QUEST -> startQuest();
-            case SPONSOR_QUEST -> sponsorQuest(arg[0]);
-            case ADD_CARD_TO_STAGE -> addCardToStage(arg[0]);
-            case QUIT_STAGE_SETUP -> quitStage();
-            case PARTICIPATE_IN_QUEST -> participateInQuest(arg[0], arg[1]);
-            case ADD_CARD_TO_ATTACK -> addCardToAttack(arg[0], arg[1]);
-            case QUIT_ATTACK_SETUP -> quitAttack(arg[0]);
-            case RESOLVE_ATTACKS -> resolveAttacks();
-            case END_QUEST -> endQuest();
-            case CLEANUP_QUEST -> cleanupQuest();
-            case NEXT_TURN -> nextTurn();
-            case END_GAME -> endGame();
+            case START_GAME -> startGame(gameState);
+            case DRAW_QUEST_CARD -> drawQuestCard(gameState);
+            case PLAGUE -> plague(gameState);
+            case QUEENS_FAVOR -> queensFavor(gameState);
+            case PROSPERITY -> prosperity(gameState);
+            case TRIM_CARD -> trimCard(gameState, arg[0], arg[1]);
+            case START_QUEST -> startQuest(gameState);
+            case SPONSOR_QUEST -> sponsorQuest(gameState, arg[0]);
+            case ADD_CARD_TO_STAGE -> addCardToStage(gameState, arg[0]);
+            case QUIT_STAGE_SETUP -> quitStage(gameState);
+            case PARTICIPATE_IN_QUEST -> participateInQuest(gameState, arg[0], arg[1]);
+            case ADD_CARD_TO_ATTACK -> addCardToAttack(gameState, arg[0], arg[1]);
+            case QUIT_ATTACK_SETUP -> quitAttack(gameState, arg[0]);
+            case RESOLVE_ATTACKS -> resolveAttacks(gameState);
+            case END_QUEST -> endQuest(gameState);
+            case CLEANUP_QUEST -> cleanupQuest(gameState);
+            case NEXT_TURN -> nextTurn(gameState);
             default -> Response.INVALID_REQUEST;
         };
-    }
-
-    /**
-     * Ends the current game and re-initializes the game state.
-     *
-     * @return A Response enum value indicating the result of the action.
-     */
-    private Response endGame() {
-        gameState = new GameState();
-        return Response.SUCCESS;
     }
 
     /**
@@ -149,7 +126,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response nextTurn() {
+    static Response nextTurn(GameState gameState) {
         if (gameState.currentCard == null) return Response.NO_CARD_DRAWN;
         for (Player player : gameState.players)
             if (computeTrim(player) > 0) return Response.TRIM_REQUIRED;
@@ -166,7 +143,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response cleanupQuest() {
+    static Response cleanupQuest(GameState gameState) {
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (!gameState.questState.questCompleted) return Response.QUEST_NOT_COMPLETED;
 
@@ -176,7 +153,7 @@ public class GameLogic {
             int cardsToPickup = gameState.questState.stages.stream()
                                         .mapToInt(List::size)
                                         .sum() + gameState.questState.questSize;
-            getQuestState().sponsor.pickCards(gameState.adventureDeck.draw(cardsToPickup));
+            gameState.questState.sponsor.pickCards(gameState.adventureDeck.draw(cardsToPickup));
             response = (gameState.questState.sponsor.getDeck().size() > 12) ? Response.TRIM_REQUIRED : Response.SUCCESS;
         }
         gameState.questState = null;
@@ -188,23 +165,32 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response endQuest() {
+    static Response endQuest(GameState gameState) {
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (gameState.questState.sponsor != null) {
-            if (gameState.questState.questCompleted && getQuestState().participants.isEmpty())
+            if (gameState.questState.questCompleted && gameState.questState.participants.isEmpty())
                 return Response.NO_WINNERS;
-            if (getQuestState().currentAttackStage <= getQuestState().stages.size())
+            if (gameState.questState.currentAttackStage <= gameState.questState.stages.size())
                 return Response.QUEST_NOT_COMPLETED;
 
-            for (Player player : getQuestState().participants) {
-                player.shields += getQuestState().questSize;
-                if (player.shields >= 7) gameState.winners.add(player);
+            for (Player player : gameState.questState.participants) {
+                player.shields += gameState.questState.questSize;
             }
-            getQuestState().questCompleted = true;
+            updateWinners(gameState);
+            gameState.questState.questCompleted = true;
             return Response.WINNERS;
         }
-        getQuestState().questCompleted = true;
+        gameState.questState.questCompleted = true;
         return Response.NO_WINNERS;
+    }
+
+    static void updateWinners(GameState gs) {
+        gs.winners.clear();
+        for (Player player : gs.players) {
+            if (player.shields >= 7) {
+                gs.winners.add(player);
+            }
+        }
     }
 
     /**
@@ -212,7 +198,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response resolveAttacks() {
+    static Response resolveAttacks(GameState gameState) {
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (gameState.questState.questCompleted) return Response.QUEST_ALREADY_COMPLETED;
         if (gameState.questState.currentAttackStage > gameState.questState.stages.size())
@@ -220,14 +206,14 @@ public class GameLogic {
 
         discardListCards(gameState.adventureDeck, gameState.questState.attacks.values());
         List<Card> stage = gameState.questState.stages.get(gameState.questState.currentAttackStage - 1);
-        boolean questCompleted = !resolveAttacks(getQuestState().participants,
-                                                 getQuestState().attacks,
+        boolean questCompleted = !resolveAttacks(gameState.questState.participants,
+                                                 gameState.questState.attacks,
                                                  getStageValue(stage));
         if (questCompleted) {
             gameState.questState.questCompleted = true;
             return Response.QUEST_COMPLETED;
         }
-        getQuestState().attacks.clear();
+        gameState.questState.attacks.clear();
         gameState.questState.currentAttackStage++;
         return Response.SUCCESS;
     }
@@ -238,7 +224,7 @@ public class GameLogic {
      * @param playerIDArg The ID of the player quitting the attack setup.
      * @return A Response enum value indicating the result of the action.
      */
-    private Response quitAttack(Object playerIDArg) {
+    static Response quitAttack(GameState gameState, Object playerIDArg) {
         if (!(playerIDArg instanceof Integer playerID)) return Response.INVALID_INPUT;
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (gameState.questState.questCompleted) return Response.QUEST_ALREADY_COMPLETED;
@@ -255,7 +241,7 @@ public class GameLogic {
      * @param cardArg     The card object to be added.
      * @return A Response enum value indicating the result of the action.
      */
-    private Response addCardToAttack(Object playerIDArg, Object cardArg) {
+    static Response addCardToAttack(GameState gameState, Object playerIDArg, Object cardArg) {
         if (!(cardArg instanceof Card card) || !(playerIDArg instanceof Integer playerId))
             return Response.INVALID_INPUT;
 
@@ -282,16 +268,16 @@ public class GameLogic {
      * @param participateArg A boolean value indicating whether the player wants to participate.
      * @return A Response enum value indicating the result of the action.
      */
-    private Response participateInQuest(Object playerIDArg, Object participateArg) {
+    static Response participateInQuest(GameState gameState, Object playerIDArg, Object participateArg) {
         if (!(participateArg instanceof Boolean participate) || !(playerIDArg instanceof Integer playerID))
             return Response.INVALID_INPUT;
         Player player = gameState.players[playerID - 1];
-        if (!getQuestState().participants.contains(player)) return Response.PLAYER_NOT_IN_QUEST;
+        if (!gameState.questState.participants.contains(player)) return Response.PLAYER_NOT_IN_QUEST;
 
         if (!participate) {
-            getQuestState().participants.remove(player);
-            if (getQuestState().participants.isEmpty())
-                getQuestState().questCompleted = true;
+            gameState.questState.participants.remove(player);
+            if (gameState.questState.participants.isEmpty())
+                gameState.questState.questCompleted = true;
             return Response.SUCCESS;
         }
 
@@ -307,17 +293,17 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response quitStage() {
+    static Response quitStage(GameState gameState) {
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (gameState.questState.questCompleted) return Response.QUEST_ALREADY_COMPLETED;
         if (gameState.questState.stages.size() < gameState.questState.currentStage) return Response.NO_CARDS_IN_STAGE;
         if (gameState.questState.stages.get(gameState.questState.currentStage - 1).isEmpty())
             return Response.NO_CARDS_IN_STAGE;
 
-        int previousStageValue = getQuestState().currentStage == 1
+        int previousStageValue = gameState.questState.currentStage == 1
                 ? 0
-                : getStageValue(getQuestState().stages.get(getQuestState().currentStage - 2));
-        int currentStageValue = getStageValue(getQuestState().stages.get(getQuestState().currentStage - 1));
+                : getStageValue(gameState.questState.stages.get(gameState.questState.currentStage - 2));
+        int currentStageValue = getStageValue(gameState.questState.stages.get(gameState.questState.currentStage - 1));
         if (currentStageValue <= previousStageValue) return Response.INSUFFICIENT_STAGE_VALUE;
 
         return (++gameState.questState.currentStage) > gameState.questState.questSize ?
@@ -331,7 +317,7 @@ public class GameLogic {
      * @param arg The card object to be added to the stage.
      * @return A Response enum value indicating the result of the action.
      */
-    private Response addCardToStage(Object arg) {
+    static Response addCardToStage(GameState gameState, Object arg) {
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
         if (gameState.questState.currentStage > gameState.questState.questSize) return Response.ALL_STAGES_SET;
         if (gameState.questState.stages.size() < gameState.questState.currentStage)
@@ -355,7 +341,7 @@ public class GameLogic {
      * @param cards        The list of cards already in the stage.
      * @return true if the stage already contains a foe card, false otherwise.
      */
-    private boolean multipleFoes(Card cardSelected, List<Card> cards) {
+    private static boolean multipleFoes(Card cardSelected, List<Card> cards) {
         return cardSelected.type == 'F' && cards.stream().anyMatch(card -> card.type == 'F');
     }
 
@@ -364,7 +350,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response startQuest() {
+    static Response startQuest(GameState gameState) {
         Card questCard = gameState.currentCard;
         if (questCard == null) return Response.NO_QUEST_STARTED;
         if (questCard.type != 'Q') return Response.INVALID_REQUEST;
@@ -378,14 +364,14 @@ public class GameLogic {
     /**
      * Sets the sponsor for the current quest.
      *
-     * @param arg The ID of the player sponsoring the quest.
+     * @param sponsorIdArg The ID of the player sponsoring the quest.
      * @return A Response enum value indicating the result of the action.
      */
-    private Response sponsorQuest(Object arg) {
-        if (!(arg instanceof Integer sponsorID)) return Response.INVALID_INPUT;
+    static Response sponsorQuest(GameState gameState, Object sponsorIdArg) {
+        if (!(sponsorIdArg instanceof Integer sponsorID)) return Response.INVALID_INPUT;
         if (gameState.questState == null) return Response.NO_QUEST_STARTED;
 
-        if (sponsorID == -1 || sponsorID == 0) {
+        if (sponsorID <= 0) {
             gameState.questState.questCompleted = true;
             return Response.QUEST_COMPLETED;
         }
@@ -403,7 +389,7 @@ public class GameLogic {
      * @param cardArg   The Card to be trimmed.
      * @return A Response enum value indicating the result of the action.
      */
-    private Response trimCard(Object playerArg, Object cardArg) {
+    static Response trimCard(GameState gameState, Object playerArg, Object cardArg) {
         if (!(playerArg instanceof Integer playerID) || !(cardArg instanceof Card card)) return Response.INVALID_INPUT;
 
         Player player = gameState.players[playerID - 1];
@@ -418,7 +404,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response queensFavor() {
+    static Response queensFavor(GameState gameState) {
         Player player = gameState.players[gameState.currentPlayer];
         player.pickCards(gameState.adventureDeck.draw(2));
         return player.getDeck().size() > 12 ? Response.TRIM_REQUIRED : Response.SUCCESS;
@@ -429,7 +415,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response prosperity() {
+    static Response prosperity(GameState gameState) {
         boolean trimRequired = false;
         for (Player player : gameState.players) {
             player.pickCards(gameState.adventureDeck.draw(2));
@@ -444,7 +430,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response plague() {
+    static Response plague(GameState gameState) {
         Player player = gameState.players[gameState.currentPlayer];
         player.shields = Math.max(player.shields - 2, 0);
         return Response.SUCCESS;
@@ -455,7 +441,7 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response drawQuestCard() {
+    static Response drawQuestCard(GameState gameState) {
         if (gameState.currentCard != null) return Response.CARD_ALREADY_DRAWN;
         gameState.currentCard = gameState.questDeck.draw();
         return Response.SUCCESS;
@@ -466,28 +452,31 @@ public class GameLogic {
      *
      * @return A Response enum value indicating the result of the action.
      */
-    private Response startGame() {
-        gameState = new GameState();
-        setupGame();
+    static Response startGame(GameState gameState) {
+        gameState.clear();
+        setupGame(gameState);
         return Response.SUCCESS;
     }
 
     /**
      * Sets up the game by initializing and shuffling the decks, and dealing cards to the players.
      */
-    void setupGame() {
-        gameState.adventureDeck.initAdventureDeck();
-        gameState.questDeck.initQuestDeck();
-        gameState.adventureDeck.shuffle();
-        gameState.questDeck.shuffle();
-        for (Player player : gameState.players) {
-            player.pickCards(gameState.adventureDeck.draw(12));
-        }
-        gameState.currentPlayer = 0;
+    private static void setupGame(GameState gs) {
+        gs.adventureDeck.initAdventureDeck();
+        gs.questDeck.initQuestDeck();
+        gs.adventureDeck.shuffle();
+        gs.questDeck.shuffle();
+        initPlayers(gs);
+        gs.currentPlayer = 0;
     }
 
-    public Response setupGameState(String test) {
-        gameState = TestGameStates.getTestState(test);
-        return Response.SUCCESS;
+    static void initPlayers(GameState gs) {
+        for (Player player : gs.players) {
+            player.pickCards(gs.adventureDeck.draw(12));
+        }
+    }
+
+    public static boolean setupGameState(GameState gs, String test) {
+        return TestGameStates.getTestState(gs, test);
     }
 }

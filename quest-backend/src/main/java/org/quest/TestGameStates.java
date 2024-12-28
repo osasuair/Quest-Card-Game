@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestGameStates {
-    public static GameState getTestState(String testNum) {
+    public static boolean getTestState(GameState gs, String testNum) {
         return switch (testNum) {
-            case "winner2_game_2winner_quest" -> winner2_game_2winner_quest_start_state();
-            case "winner1_game_with_events" -> winner1_game_with_events_start_state();
-            case "winner0_quest" -> winner0_quest();
-            case "a1_scenario" -> a1_scenario();
-            default -> null;
+            case "winner2_game_2winner_quest" -> winner2_game_2winner_quest_start_state(gs);
+            case "winner1_game_with_events" -> winner1_game_with_events_start_state(gs);
+            case "winner0_quest" -> winner0_quest(gs);
+            case "a1_scenario" -> a1_scenario(gs);
+            default -> false;
         };
     }
 
-    private static GameState winner1_game_with_events_start_state() {
-        GameState gameState = new GameState();
+    private static boolean winner1_game_with_events_start_state(GameState gameState) {
         gameState.adventureDeck.initAdventureDeck();
 
         // Rig Hands
@@ -40,11 +39,10 @@ public class TestGameStates {
                                         new Card("Quest", 'Q', 3),
                                         new Card("Plague")));
 
-        return gameState;
+        return true;
     }
 
-    private static GameState winner2_game_2winner_quest_start_state() {
-        GameState gameState = new GameState();
+    private static boolean winner2_game_2winner_quest_start_state(GameState gameState) {
         gameState.adventureDeck.initAdventureDeck();
 
         // Rig Hands
@@ -63,12 +61,10 @@ public class TestGameStates {
         gameState.questDeck.add(List.of(new Card("Quest", 'Q', 4),
                                         new Card("Quest", 'Q', 3),
                                         new Card("Plague")));
-
-        return gameState;
+        return true;
     }
 
-    private static GameState winner0_quest() {
-        GameState gameState = new GameState();
+    private static boolean winner0_quest(GameState gameState) {
         gameState.adventureDeck.initAdventureDeck();
 
         // Rig Hands
@@ -85,11 +81,10 @@ public class TestGameStates {
         gameState.questDeck.add(List.of(new Card("Quest", 'Q', 2),
                                         new Card("Plague")));
 
-        return gameState;
+        return true;
     }
 
-    private static GameState a1_scenario() {
-        GameState gameState = new GameState();
+    private static boolean a1_scenario(GameState gameState) {
         gameState.adventureDeck.initAdventureDeck();
         gameState.adventureDeck.shuffle();
 
@@ -108,7 +103,7 @@ public class TestGameStates {
         gameState.questDeck.add(List.of(new Card("Quest", 'Q', 4),
                                         new Card("Plague")));
 
-        return gameState;
+        return true;
     }
 
 
@@ -119,7 +114,7 @@ public class TestGameStates {
      * @param hand          A string representing the cards to pick (e.g., "[F5, F5, F10]").
      * @return A list of cards picked from the deck.
      */
-    private static List<Card> pickCardsFromDeck(Deck adventureDeck, String hand) {
+    static List<Card> pickCardsFromDeck(Deck adventureDeck, String hand) {
         List<Card> result = new ArrayList<>();
         for (String card : parseStringList(hand)) {
             char type = card.charAt(0);

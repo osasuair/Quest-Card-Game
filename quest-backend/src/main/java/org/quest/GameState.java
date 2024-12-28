@@ -14,7 +14,11 @@ public class GameState {
     List<Player> winners;
     QuestState questState;
 
-    GameState() {
+    public GameState() {
+        init();
+    }
+
+    private void init() {
         currentPlayer = 0;
         adventureDeck = new Deck();
         questDeck = new Deck();
@@ -69,5 +73,11 @@ public class GameState {
 
     public void setPlayers(Player[] players) {
         this.players = players;
+    }
+
+    public void clear() {
+        init();
+        questState = null;
+        currentCard = null;
     }
 }
